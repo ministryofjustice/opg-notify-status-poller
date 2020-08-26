@@ -1,0 +1,26 @@
+{
+  "name": "ministryofjustice/opg-notify-status-poller",
+  "description": "Fetch Notify status and update Sirius",
+  "type": "project",
+  "license": "ISC",
+  "require": {
+    "laminas/laminas-log": "^2.12",
+    "alphagov/notifications-php-client": "^3.0",
+    "guzzlehttp/guzzle": "^7.0",
+    "guzzlehttp/psr7": "^1.6"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "NotifyStatusPoller\\": "src/NotifyStatusPoller",
+      "NotifyStatusPollerTest\\": "tests/NotifyStatusPollerTest"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "7.4.0"
+    }
+  }
+}
