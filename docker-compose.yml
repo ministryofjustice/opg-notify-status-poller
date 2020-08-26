@@ -1,0 +1,161 @@
+---
+version: "3.6"
+
+services:
+
+  job-runner:
+    image: notify-status-poller:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        ENABLE_DEV_DEPS: "true"
+    env_file: [local.env]
+
+  phpqa:
+    image: jakzal/phpqa:php7.4-alpine
+    build:
+      context: .
+      dockerfile: docker/phpqa/Dockerfile
+
+  phpstan:
+    image: jakzal/phpqa:php7.4-alpine
+    volumes:
+      - .:/app
+    command:
+      - "phpstan"
+      - "analyse"
+      - "-c"
+      - "/app/tests/phpstan.neon"
+
+  lint:
+    image: jakzal/phpqa:php7.4-alpine
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    command:
+      - phpcs
+      - -p
+      - --report=checkstyle
+      - --standard=PSR12
+      - --warning-severity=0
+      - /app/src
+      - /app/public
+
+  phpmd:
+    image: jakzal/phpqa:php7.4-alpine
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    command:
+      - phpmd
+      - /app/src/NotifyStatusPoller
+      - text
+      - codesize,unusedcode,naming
+
+  test:
+    image: jakzal/phpqa:php7.4-alpine
+    volumes:
+      - .:/app
+    command:
+      - "php"
+      - "-dpcov.enabled=1"
+      - "-dpcov.directory=."
+      - "-dpcov.exclude=\"~vendor~\""
+      - "/app/vendor/bin/phpunit"
+      - "--configuration=/app/tests/phpunit.xml"
+      - "--coverage-text"
+      - "--log-junit=/app/test-results/unit/results.xml"
+      - "--testsuite=unit"
+
+  test-functional:
+    image: notify-status-poller:latest
+    depends_on:
+      - mock-notify
+      - mock-sirius
+    volumes:
+      - .:/var/www
+    command:
+      - "/var/www/vendor/bin/phpunit"
+      - "--configuration=/var/www/tests/phpunit.xml"
+      - "--no-coverage"
+      - "--log-junit=/var/www/test-results/functional/results.xml"
+      - "--testsuite=functional"
+    env_file: [local.env]
+
+  test-functional-ci:
+    image: notify-status-poller:latest
+    depends_on:
+      - mock-notify-ci
+      - mock-sirius-ci
+    command:
+      - "/var/www/vendor/bin/phpunit"
+      - "--configuration=/var/www/tests/phpunit.xml"
+      - "--no-coverage"
+      - "--log-junit=/var/www/test-results/functional/results.xml"
+      - "--testsuite=functional"
+    env_file: [local.env]
+
+  mock-notify:
+    image: mock-notify:latest
+    container_name: mock-notify
+    build:
+      context: .
+      dockerfile: docker/mock-notify/Dockerfile
+    command:
+      - "mock"
+      - "-h"
+      - "0.0.0.0"
+      - "/app/mock-notify/openapi.yml"
+    volumes:
+      - "./docker/mock-notify:/app/mock-notify"
+    ports:
+      - "4010:4010"
+
+  mock-sirius:
+    image: mock-sirius:latest
+    container_name: mock-sirius
+    build:
+      context: .
+      dockerfile: docker/mock-sirius/Dockerfile
+    command:
+      - "mock"
+      - "-p"
+      - "4011"
+      - "-h"
+      - "0.0.0.0"
+      - "/app/mock-sirius/openapi.yml"
+    volumes:
+      - "./docker/mock-sirius:/app/mock-sirius"
+    ports:
+      - "4011:4011"
+
+  mock-notify-ci:
+    image: mock-notify:latest
+    container_name: mock-notify
+    build:
+      context: .
+      dockerfile: docker/mock-notify/Dockerfile
+    command:
+      - "mock"
+      - "-h"
+      - "0.0.0.0"
+      - "/app/mock-notify/openapi.yml"
+    ports:
+      - "4010:4010"
+
+  mock-sirius-ci:
+    image: mock-sirius:latest
+    container_name: mock-sirius
+    build:
+      context: .
+      dockerfile: docker/mock-sirius/Dockerfile
+    command:
+      - "mock"
+      - "-p"
+      - "4011"
+      - "-h"
+      - "0.0.0.0"
+      - "/app/mock-sirius/openapi.yml"
+    ports:
+      - "4011:4011"
