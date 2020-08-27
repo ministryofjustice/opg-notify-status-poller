@@ -1,0 +1,44 @@
+._*
+.~lock.*
+.buildpath
+.DS_Store
+.idea
+.run
+.project
+.settings
+build/output
+build/cache.properties
+*~
+vendor/
+venv/
+.git
+.gitignore
+.DS_Store
+.gitignore
+.editorconfig
+.phpstorm.*
+README.md
+LICENCE*
+docs
+
+# Node
+**/bower_components/
+.npm*
+*/node_modules
+.v8*
+
+# PHP
+vendor
+.php_cs.cache
+.phpunit.result.cache
+
+# Build
+Jenkinsfile
+Dockerfile
+Dockerfile*
+docker-compose*
+Makefile
+composer.phar
+
+local.env
+tmp-phpqa
