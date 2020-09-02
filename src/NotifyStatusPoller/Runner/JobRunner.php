@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Runner;
 
+use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 use Throwable;
 use Psr\Log\LoggerInterface;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
@@ -39,32 +40,34 @@ class JobRunner
         $this->logger = $logger;
     }
 
+    /**
+     * @throws Throwable
+     */
     public function run(): void
     {
-        $logExtras = ['context' => Context::NOTIFY_POLLER];
+        $this->logger->info('Start', ['context' => Context::NOTIFY_POLLER]);
 
-        $this->logger->info('Start', $logExtras);
-
-        try {
-            $inProgressResults = $this->getInProgressDocumentsHandler->handle();
-        } catch (Throwable $e) {
-            $logExtras = array_merge($logExtras, ['error' => (string)$e, 'trace' => $e->getTraceAsString()]);
-            $this->logger->critical('Error querying documents', $logExtras);
-
-            return;
-        }
+        $inProgressResults = $this->getInProgressDocumentsHandler->handle();
 
         foreach ($inProgressResults as $getNotifyStatus) {
-            try {
-                $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
-
-                $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
-            } catch (Throwable $e) {
-                $logExtras = array_merge($logExtras, ['error' => (string)$e, 'trace' => $e->getTraceAsString()]);
-                $this->logger->critical('Error updating status', $logExtras);
-            }
+            $this->updateStatus($getNotifyStatus);
         }
+    }
 
-        $this->logger->info('Finish', $logExtras);
+    /**
+     * @param GetNotifyStatus $getNotifyStatus
+     */
+    private function updateStatus(GetNotifyStatus $getNotifyStatus): void
+    {
+        try {
+            $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
+            $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
+        } catch (Throwable $e) {
+            $this->logger
+                ->critical(
+                    (string)$e,
+                    ['trace' => $e->getTraceAsString(), 'context' => Context::NOTIFY_POLLER]
+                );
+        }
     }
 }

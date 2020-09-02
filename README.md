@@ -36,7 +36,7 @@ Functional tests
     
 ## Check Linting / Static Analysis
 
-    docker-compose --project-name notify-status-poller run --rm lint    
+    docker-compose --project-name notify-status-poller run --rm lint
     docker-compose --project-name notify-status-poller run --rm phpstan
    
 ## References

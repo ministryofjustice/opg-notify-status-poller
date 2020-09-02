@@ -28,9 +28,10 @@ class UpdateDocumentStatusHandler
 
     /**
      * @param UpdateDocumentStatus $command
+     * @return null
      * @throws GuzzleException
      */
-    public function handle(UpdateDocumentStatus $command): void
+    public function handle(UpdateDocumentStatus $command)
     {
         $payload = [
             'documentId' => $command->getDocumentId(),
@@ -48,5 +49,10 @@ class UpdateDocumentStatusHandler
                 sprintf('Expected status "%s" but received "%s"', 204, $guzzleResponse->getStatusCode())
             );
         }
+
+        // See https://github.com/sebastianbergmann/phpunit/issues/4297
+        // PHPUnit is deprecating self::at and we need a way to trigger an exception.
+        // Replace with `void` if/when they implement a better replacement for `at`.
+        return null;
     }
 }

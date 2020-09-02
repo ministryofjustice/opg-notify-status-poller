@@ -6,6 +6,7 @@ namespace NotifyStatusPoller\Query\Handler;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
+use NotifyStatusPoller\Exception\AggregateValidationException;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 
 class GetInProgressDocumentsHandler
@@ -22,6 +23,7 @@ class GetInProgressDocumentsHandler
     /**
      * @return GetNotifyStatus[]
      * @throws GuzzleException
+     * @throws AggregateValidationException
      */
     public function handle(): array
     {
