@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Runner;
 
+use Throwable;
 use Exception;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\Test\TestLogger;
-use Throwable;
 use PHPUnit\Framework\TestCase;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
