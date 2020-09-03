@@ -13,7 +13,7 @@ class UpdateDocumentStatus
     protected string $notifyStatus;
 
     /**
-     * @param array<string,string> $data
+     * @param array<string,mixed> $data
      */
     public function __construct(array $data)
     {
