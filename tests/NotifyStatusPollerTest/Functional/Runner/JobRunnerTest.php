@@ -14,6 +14,7 @@ use NotifyStatusPoller\Runner\JobRunner;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use Psr\Log\Test\TestLogger;
+use Throwable;
 
 class JobRunnerTest extends TestCase
 {
@@ -57,11 +58,22 @@ class JobRunnerTest extends TestCase
         );
     }
 
-    public function testRunSuccess()
+    /**
+     * @throws Throwable
+     */
+    public function testRunSuccess(): void
     {
+        $expectedProcessedJobCount = 3;
         $this->jobRunner->run();
 
         self::assertTrue($this->logger->hasInfoThatContains('Start'));
+        self::assertTrue($this->logger->hasInfoThatContains('Updating'));
+        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
+
+        $infoLogRecords =  $this->logger->recordsByLevel[LogLevel::INFO];
+        self::assertEquals($expectedProcessedJobCount, $infoLogRecords[1]['context']['count']);
+        self::assertEquals($expectedProcessedJobCount, $infoLogRecords[2]['context']['count']);
+
         self::assertArrayNotHasKey(LogLevel::CRITICAL, $this->logger->recordsByLevel);
     }
 }

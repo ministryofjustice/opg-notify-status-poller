@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Runner;
 
-use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 use Throwable;
 use Psr\Log\LoggerInterface;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
@@ -49,25 +48,23 @@ class JobRunner
 
         $inProgressResults = $this->getInProgressDocumentsHandler->handle();
 
-        foreach ($inProgressResults as $getNotifyStatus) {
-            $this->updateStatus($getNotifyStatus);
-        }
-    }
+        $this->logger->info('Updating', ['count' => count($inProgressResults), 'context' => Context::NOTIFY_POLLER]);
+        $updatedCount = 0;
 
-    /**
-     * @param GetNotifyStatus $getNotifyStatus
-     */
-    private function updateStatus(GetNotifyStatus $getNotifyStatus): void
-    {
-        try {
-            $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
-            $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
-        } catch (Throwable $e) {
-            $this->logger
-                ->critical(
-                    (string)$e,
-                    ['trace' => $e->getTraceAsString(), 'context' => Context::NOTIFY_POLLER]
-                );
+        foreach ($inProgressResults as $getNotifyStatus) {
+            try {
+                $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
+                $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
+                $updatedCount++;
+            } catch (Throwable $e) {
+                $this->logger
+                    ->critical(
+                        (string)$e,
+                        ['trace' => $e->getTraceAsString(), 'context' => Context::NOTIFY_POLLER]
+                    );
+            }
         }
+
+        $this->logger->info('Finished', ['count' => $updatedCount, 'context' => Context::NOTIFY_POLLER]);
     }
 }
