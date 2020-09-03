@@ -24,11 +24,11 @@ paths:
                   summary: Multiple documents
                   value:
                     - id: 638471
-                      reference: d5d3d70b-869b-4442-bbb2-4db8557e2e2f
+                      notifySendId: d5d3d70b-869b-4442-bbb2-4db8557e2e2f
                     - id: 29374
-                      reference: b20aac55-cef9-4a94-850b-45bbc46460c8
+                      notifySendId: b20aac55-cef9-4a94-850b-45bbc46460c8
                     - id: 846269
-                      reference: 82c104b6-0e43-4801-a774-4ec977dc12b2
+                      notifySendId: 82c104b6-0e43-4801-a774-4ec977dc12b2
 
   "/update-send-status":
     put:
@@ -110,9 +110,8 @@ components:
         id:
           type: string
           format: uuid
-        reference:
+        notifySendId:
           type: string
-          format: uuid
     Error:
       type: object
       required:
