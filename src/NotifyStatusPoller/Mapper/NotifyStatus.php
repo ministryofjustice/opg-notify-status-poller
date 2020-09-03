@@ -13,13 +13,20 @@ class NotifyStatus
     public const SIRIUS_POSTING = 'posting';
     public const SIRIUS_POSTED = 'posted';
 
+    public const PENDING_VIRUS_CHECK = 'pending-virus-check';
+    public const VIRUS_SCAN_FAILED = 'virus-scan-failed';
+    public const VALIDATION_FAILED = 'validation-failed';
+    public const FAILED = 'failed';
+    public const ACCEPTED = 'accepted';
+    public const RECEIVED = 'received';
+
     public const STATUSES = [
-        'failed' => self::SIRIUS_REJECTED,
-        'virus-scan-failed' => self::SIRIUS_REJECTED,
-        'validation-failed' => self::SIRIUS_REJECTED,
-        'pending-virus-check' => self::SIRIUS_QUEUED,
-        'accepted' => self::SIRIUS_POSTING,
-        'received' => self::SIRIUS_POSTED,
+        self::FAILED => self::SIRIUS_REJECTED,
+        self::VIRUS_SCAN_FAILED => self::SIRIUS_REJECTED,
+        self::VALIDATION_FAILED => self::SIRIUS_REJECTED,
+        self::PENDING_VIRUS_CHECK => self::SIRIUS_QUEUED,
+        self::ACCEPTED => self::SIRIUS_POSTING,
+        self::RECEIVED => self::SIRIUS_POSTED,
     ];
 
     public function toSirius(string $notifyStatus): string
