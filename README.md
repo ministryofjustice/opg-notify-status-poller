@@ -29,14 +29,13 @@ Unit tests
 
 Functional tests
     
-    docker-compose --project-name notify-status-poller up -d localstack
     docker-compose --project-name notify-status-poller up -d --build --force-recreate mock-notify
     docker-compose --project-name notify-status-poller up -d --build --force-recreate mock-sirius
     docker-compose --project-name notify-status-poller run --rm test-functional
     
 ## Check Linting / Static Analysis
 
-    docker-compose --project-name notify-status-poller run --rm lint    
+    docker-compose --project-name notify-status-poller run --rm lint
     docker-compose --project-name notify-status-poller run --rm phpstan
    
 ## References

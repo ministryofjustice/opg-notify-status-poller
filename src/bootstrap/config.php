@@ -16,6 +16,8 @@ return [
             Client::BASE_URL_PRODUCTION : getenv('OPG_NOTIFY_BASE_URL'),
     ],
     'sirius' => [
+        'in_progress_documents_endpoint' =>
+            getenv('OPG_SIRIUS_IN_PROGRESS_DOCUMENTS_ENDPOINT') ?: '/list-in-progress',
         'update_status_endpoint' => getenv('OPG_SIRIUS_UPDATE_STATUS_ENDPOINT') ?: '/update-status',
     ],
 ];

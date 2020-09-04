@@ -7,6 +7,29 @@ servers:
   - url: http://localhost:4011
     description: Local Prism server
 paths:
+  "/list-in-progress":
+    get:
+      summary: Get list of in progress documents
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+              examples:
+                multiple:
+                  summary: Multiple documents
+                  value:
+                    - id: 638471
+                      notifySendId: d5d3d70b-869b-4442-bbb2-4db8557e2e2f
+                    - id: 29374
+                      notifySendId: b20aac55-cef9-4a94-850b-45bbc46460c8
+                    - id: 846269
+                      notifySendId: 82c104b6-0e43-4801-a774-4ec977dc12b2
+
   "/update-send-status":
     put:
       tags:
@@ -81,6 +104,14 @@ components:
             - temporary-failure
             - technical-failure
           default: sending
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        notifySendId:
+          type: string
     Error:
       type: object
       required:
