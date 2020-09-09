@@ -94,8 +94,10 @@ jobs:
           version: 18.06.0-ce
           docker_layer_caching: false
       - run:
-          name: Prep local env variables for docker compose
-          command: cp local.env.example local.env
+          name: Prep files
+          command: |
+            cp local.env.example local.env
+            chmod +x scripts/wait-for-prism.sh
       - run:
           name: Build job-runner image with dev dependencies
           command: docker-compose build job-runner
@@ -103,10 +105,12 @@ jobs:
           name: Start Mock Notify
           command: |
             docker-compose up --build --force-recreate -d mock-notify-ci
+            ./scripts/wait-for-prism.sh mock-notify
       - run:
           name: Start Mock Sirius
           command: |
             docker-compose up --build --force-recreate -d mock-sirius-ci
+            ./scripts/wait-for-prism.sh mock-sirius
       - run:
           name: Run functional tests
           command: docker-compose run test-functional-ci
