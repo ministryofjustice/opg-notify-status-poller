@@ -22,7 +22,7 @@ try {
     while ($doRunLoop) {
         $jobRunner->run();
 
-        sleep($config['consumer']['sleep_time']);
+        sleep($config['job_runner']['sleep_time']);
     }
 } catch (Throwable $e) {
     exception_handler($e);
