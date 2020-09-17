@@ -86,12 +86,91 @@ class JobRunnerTest extends TestCase
 
         self::assertFalse($this->logger->hasCriticalRecords(), var_export($this->logger->records, true));
         self::assertTrue($this->logger->hasInfoThatContains('Start'));
+        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
     }
 
     /**
      * @throws Throwable
      */
-    public function test_run_thrown_exception_is_logged_and_continues(): void
+    public function test_run_catch_exception_thrown_fetching_statuses_failure(): void
+    {
+        $expectedException = new Exception('Oops...');
+
+        $this->getInProgressDocumentsHandlerMock
+            ->method('handle')
+            ->willThrowException($expectedException);
+
+        $this->getNotifyStatusHandlerMock->expects(self::never())->method('handle');
+        $this->updateDocumentStatusHandlerMock->expects(self::never())->method('handle');
+
+        $this->jobRunner->run();
+
+        self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
+        self::assertTrue($this->logger->hasInfoThatContains('Start'));
+        self::assertFalse($this->logger->hasInfoThatContains('Finished'));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function test_run_thrown_exception_from_notify_handler_is_logged_and_continues_success(): void
+    {
+        $expectedException = new Exception('Oops...');
+        $inProgressDocuments = [
+            new GetNotifyStatus([
+                'documentId' => 100,
+                'notifyId' => 'ref-1',
+            ]),
+            new GetNotifyStatus([
+                'documentId' => 200,
+                'notifyId' => 'ref-2',
+            ]),
+        ];
+        $updateDocumentStatuses = [
+            new UpdateDocumentStatus([
+                'documentId' => 100,
+                'notifyId' => 'ref-1',
+                'notifyStatus' => 'status-1',
+            ]),
+            new UpdateDocumentStatus([
+                'documentId' => 200,
+                'notifyId' => 'ref-2',
+                'notifyStatus' => 'status-2',
+            ]),
+        ];
+
+        $this->getInProgressDocumentsHandlerMock
+            ->expects(self::once())
+            ->method('handle')
+            ->willReturn($inProgressDocuments);
+
+        $this->getNotifyStatusHandlerMock
+            ->expects(self::exactly(2))
+            ->method('handle')
+            ->withConsecutive([$inProgressDocuments[0]], [$inProgressDocuments[1]])
+            ->willReturnOnConsecutiveCalls(self::throwException($expectedException), $updateDocumentStatuses[1]);
+
+        $this->updateDocumentStatusHandlerMock
+            ->expects(self::once())
+            ->method('handle')
+            ->with($updateDocumentStatuses[1]);
+
+        $this->jobRunner->run();
+
+        self::assertTrue(
+            $this->logger->hasCriticalThatContains($expectedException->getMessage()),
+            var_export($this->logger->records, true)
+        );
+
+        self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
+        self::assertTrue($this->logger->hasInfoThatContains('Start'));
+        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function test_run_thrown_exception_from_api_update_is_logged_and_continues_success(): void
     {
         $expectedException = new Exception('Oops...');
         $inProgressDocuments = [
