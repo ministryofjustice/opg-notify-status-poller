@@ -46,7 +46,17 @@ class JobRunner
     {
         $this->logger->info('Start', ['context' => Context::NOTIFY_POLLER]);
 
-        $inProgressResults = $this->getInProgressDocumentsHandler->handle();
+        try {
+            $inProgressResults = $this->getInProgressDocumentsHandler->handle();
+        } catch (Throwable $e) {
+            $this->logger
+                ->critical(
+                    (string)$e,
+                    ['trace' => $e->getTraceAsString(), 'context' => Context::NOTIFY_POLLER]
+                );
+
+            return;
+        }
 
         $this->logger->info('Updating', ['count' => count($inProgressResults), 'context' => Context::NOTIFY_POLLER]);
         $updatedCount = 0;

@@ -24,8 +24,12 @@ class GetInProgressDocumentsHandler
      * @return GetNotifyStatus[]
      * @throws GuzzleException
      * @throws AggregateValidationException
+     *
+     * See https://github.com/sebastianbergmann/phpunit/issues/4297
+     * PHPUnit is deprecating self::at and we need a way to trigger an exception.
+     * Therefore this method doesn't have a return type explicitly declared.
      */
-    public function handle(): array
+    public function handle()
     {
         $response = $this->guzzleClient->get($this->endpointUri);
         $documents = json_decode($response->getBody()->getContents(), true);

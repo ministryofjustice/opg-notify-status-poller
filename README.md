@@ -2,7 +2,11 @@
 
 [![ministryofjustice](https://circleci.com/gh/ministryofjustice/opg-notify-status-poller.svg?style=svg)](https://github.com/ministryofjustice/opg-notify-status-poller)
 
-### Building
+## Building
+
+    docker build --file docker/Dockerfile --tag notify-status-poller:latest .
+
+### Building with dev dependencies
 
     cp local.env.example local.env
     
