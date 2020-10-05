@@ -10,6 +10,8 @@ paths:
   "/list-in-progress":
     get:
       summary: Get list of in progress documents
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Success
@@ -29,6 +31,8 @@ paths:
                       notifySendId: b20aac55-cef9-4a94-850b-45bbc46460c8
                     - id: 846269
                       notifySendId: 82c104b6-0e43-4801-a774-4ec977dc12b2
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
   "/update-send-status":
     put:
@@ -36,6 +40,8 @@ paths:
         - Document status
       description: Update the state of the letter in the database after the queue consumer successfully processes a letter
       operationId: updateSendStatus
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: request
           in: body
@@ -80,9 +86,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         '500':
           description: Unexpected error
-
 components:
   # https://swagger.io/docs/specification/components/
   schemas:
@@ -108,8 +115,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: int
         notifySendId:
           type: string
     Error:
@@ -141,3 +147,15 @@ components:
         instance:
           type: string
           description: URI identifying the specific instance of this problem (optional; Apigility currently does not provide this)
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+  responses:
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

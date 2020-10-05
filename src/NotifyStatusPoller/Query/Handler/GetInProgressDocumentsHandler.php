@@ -6,6 +6,7 @@ namespace NotifyStatusPoller\Query\Handler;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
+use NotifyStatusPoller\Authentication\JwtAuthentication;
 use NotifyStatusPoller\Exception\AggregateValidationException;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 
@@ -13,11 +14,13 @@ class GetInProgressDocumentsHandler
 {
     private GuzzleClient $guzzleClient;
     private string $endpointUri;
+    private JwtAuthentication $jwtAuthenticator;
 
-    public function __construct(GuzzleClient $guzzleClient, string $endpointUri)
+    public function __construct(GuzzleClient $guzzleClient, string $endpointUri, JwtAuthentication $jwtAuthenticator)
     {
         $this->guzzleClient = $guzzleClient;
         $this->endpointUri = $endpointUri;
+        $this->jwtAuthenticator = $jwtAuthenticator;
     }
 
     /**
@@ -31,7 +34,8 @@ class GetInProgressDocumentsHandler
      */
     public function handle()
     {
-        $response = $this->guzzleClient->get($this->endpointUri);
+        var_dump($this->jwtAuthenticator->buildHeaders());
+        $response = $this->guzzleClient->get($this->endpointUri, ['headers' => $this->jwtAuthenticator->buildHeaders()]);
         $documents = json_decode($response->getBody()->getContents(), true);
         $results = [];
 
