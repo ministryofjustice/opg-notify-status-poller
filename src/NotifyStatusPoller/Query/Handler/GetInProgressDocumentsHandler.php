@@ -34,7 +34,6 @@ class GetInProgressDocumentsHandler
      */
     public function handle()
     {
-        var_dump($this->jwtAuthenticator->buildHeaders());
         $response = $this->guzzleClient->get($this->endpointUri, ['headers' => $this->jwtAuthenticator->buildHeaders()]);
         $documents = json_decode($response->getBody()->getContents(), true);
         $results = [];

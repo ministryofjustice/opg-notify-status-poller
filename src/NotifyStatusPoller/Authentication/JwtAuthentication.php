@@ -25,17 +25,21 @@ class JwtAuthentication
      */
     public function buildHeaders()
     {
-        $date = (new DateTime())->format('Y-m-d h:i:s');
-//        $expiry = (new DateTime())->modify('5 minutes')->format('Y-m-d h:i:s');
+        $issueTime = time();
 
         $claims = array(
-            "session_data"=> $this->sessionData, //what do you want to preserve over page loads - in this instance this is the email address for the publicapi user - we decide what is placed in session
-            "iat"=>$date,
+            "session-data"=> $this->sessionData, //what do you want to preserve over page loads - in this instance this is the email address for the publicapi user - we decide what is placed in session
+            "iat"=>$issueTime,
+            'exp'=>$issueTime + 600
         );
+
+        var_dump($claims);
 
         //session data in LPA is declared in terraform and it is sent through the parameters - in LPA and File Service, it seems to be the public api opgtest
 
         $encoded_jwt = JWT::encode($claims,$this->jwtSecret,'HS256');
+
+        var_dump($encoded_jwt);
 
         return [
             'Authorization' => 'Bearer '.$encoded_jwt,
@@ -69,6 +73,16 @@ class JwtAuthentication
          *
          * At the moment, there is an exception as have not added the jwt stuff to the get in progress document handler which in turn is causing a 401
          * need to edit this including the services file to correctly use the authentication and have the correct number of arguments in the function
+         */
+
+        /*
+         * 1. Fix failing unit tests according to Circle CI
+         * 2. Add unit tests around new JWT class
+         * 3. Ensure that the JWT authentication does actually work by adding a document with an in progress status and seeing if it is picked up by the poller
+         * 4. Similarly a document with a status change needs to be checked so the status is updated by notify
+         * 5. Change to use the module that Rich says is better for the JWT stuff.
+         * 6. Need to add logic that if a JWT token has been generated and is still valid, to use that instead of generating a new one - have a chat with Rich
+         *
          */
     }
 }
