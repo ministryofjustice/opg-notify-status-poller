@@ -24,8 +24,6 @@ class JwtAuthentication
      */
     public function buildHeaders()
     {
-        //what the f is session-data and why is it used
-
         //Lcobucci work for generating a JWT token
         //        $token = (new Builder())->issuedBy($this->sessionData)
 //            ->issuedAt(time())
@@ -44,13 +42,9 @@ class JwtAuthentication
             'exp' => $issueTime + 600
         );
 
-        var_dump($claims);
-
         //session data in LPA is declared in terraform and it is sent through the parameters - in LPA and File Service, it seems to be the public api opgtest
 
         $encoded_jwt = JWT::encode($claims, $this->jwtSecret, 'HS256');
-
-        var_dump($encoded_jwt);
 
         return [
             'Authorization' => 'Bearer ' . $encoded_jwt,
@@ -87,7 +81,6 @@ class JwtAuthentication
          */
 
         /*
-         * 1. Fix failing unit tests according to Circle CI
          * 2. Add unit tests around new JWT class
          * 3. Ensure that the JWT authentication does actually work by adding a document with an in progress status and seeing if it is picked up by the poller
          * 4. Similarly a document with a status change needs to be checked so the status is updated by notify

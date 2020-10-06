@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Command\Handler;
 
-use Alphagov\Notifications\Authentication\JWTAuthenticationInterface;
 use NotifyStatusPoller\Authentication\JwtAuthentication;
 use UnexpectedValueException;
 use Psr\Http\Message\ResponseInterface;
