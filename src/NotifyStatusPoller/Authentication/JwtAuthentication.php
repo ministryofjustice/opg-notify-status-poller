@@ -81,8 +81,8 @@ class JwtAuthentication
          */
 
         /*
-         * 2. Add unit tests around new JWT class
          * 3. Ensure that the JWT authentication does actually work by adding a document with an in progress status and seeing if it is picked up by the poller
+         * 3. Rich comment - status code before grabbing response
          * 4. Similarly a document with a status change needs to be checked so the status is updated by notify
          * 5. Change to use the module that Rich says is better for the JWT stuff.
          * 6. Need to add logic that if a JWT token has been generated and is still valid, to use that instead of generating a new one - have a chat with Rich

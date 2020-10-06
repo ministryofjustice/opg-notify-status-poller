@@ -21,6 +21,7 @@ class GetInProgressDocumentsHandler
         $this->guzzleClient = $guzzleClient;
         $this->endpointUri = $endpointUri;
         $this->jwtAuthenticator = $jwtAuthenticator;
+
     }
 
     /**
@@ -41,7 +42,7 @@ class GetInProgressDocumentsHandler
         foreach ($documents as $doc) {
             $results[] = new GetNotifyStatus([
                 'documentId' => $doc['id'],
-                'notifyId' => $doc['notifySendId'],
+                'notifyId' => $doc['notifyId'],
             ]);
         }
 
