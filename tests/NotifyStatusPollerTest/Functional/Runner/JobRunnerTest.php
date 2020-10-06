@@ -7,6 +7,7 @@ namespace NotifyStatusPollerTest\Functional\Runner;
 use Alphagov\Notifications\Client as NotifyClient;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
+use NotifyStatusPoller\Authentication\JwtAuthentication;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
@@ -39,14 +40,20 @@ class JobRunnerTest extends TestCase
             'httpClient' => $guzzleClient,
             'baseUrl' => $config['notify']['base_url'],
         ]);
+        $jwtAuthenticator = new JwtAuthentication(
+            $config['sirius']['jwt_secret'],
+            $config['sirius']['session_data']
+        );
         $getInProgressDocumentsHandler = new GetInProgressDocumentsHandler(
             $guzzleClient,
-            $config['sirius']['in_progress_documents_endpoint']
+            $config['sirius']['in_progress_documents_endpoint'],
+            $jwtAuthenticator
         );
         $getNotifyStatusHandler = new GetNotifyStatusHandler($notifyClient);
         $updateDocumentStatusHandler = new UpdateDocumentStatusHandler(
             $notifyStatusMapper,
             $guzzleClient,
+            $jwtAuthenticator,
             $config['sirius']['update_status_endpoint']
         );
 

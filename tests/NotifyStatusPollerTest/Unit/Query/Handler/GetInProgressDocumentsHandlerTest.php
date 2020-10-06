@@ -6,6 +6,7 @@ namespace NotifyStatusPollerTest\Unit\Query\Handler;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
+use NotifyStatusPoller\Authentication\JwtAuthentication;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 use PHPUnit\Framework\TestCase;
@@ -16,10 +17,12 @@ class GetInProgressDocumentsHandlerTest extends TestCase
 {
     private const ENDPOINT_URI = 'test-web-uri';
     private GuzzleClient $guzzleClientMock;
+    private JWTAuthentication $mockAuthenticator;
 
     public function setUp(): void
     {
         $this->guzzleClientMock = $this->createMock(GuzzleClient::class);
+        $this->mockAuthenticator = $this->createMock(JwtAuthentication::class);
     }
 
     /**
@@ -27,7 +30,7 @@ class GetInProgressDocumentsHandlerTest extends TestCase
      */
     public function test_handle_gets_document_statuses_success()
     {
-        $handler = new GetInProgressDocumentsHandler($this->guzzleClientMock, self::ENDPOINT_URI);
+        $handler = new GetInProgressDocumentsHandler($this->guzzleClientMock, self::ENDPOINT_URI,$this->mockAuthenticator);
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
         $response = [
@@ -47,7 +50,8 @@ class GetInProgressDocumentsHandlerTest extends TestCase
             ),
         ];
 
-        $this->guzzleClientMock->expects(self::once())->method('get')->with(self::ENDPOINT_URI)->willReturn($responseMock);
+        $this->guzzleClientMock->expects(self::once())->method('get')->with(self::ENDPOINT_URI,
+            ['headers' => $this->mockAuthenticator->buildHeaders()])->willReturn($responseMock);
         $responseMock->method('getBody')->willReturn($streamMock);
         $streamMock->method('getContents')->willReturn(json_encode($response));
 

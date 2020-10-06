@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Authentication;
 
-use DateTime;
 use Firebase\JWT\JWT;
 
 class JwtAuthentication
@@ -21,28 +20,40 @@ class JwtAuthentication
     /**
      * Generates the headers expected by the API.
      *
-     * @return array
+     * @return array<string>
      */
     public function buildHeaders()
     {
+        //what the f is session-data and why is it used
+
+        //Lcobucci work for generating a JWT token
+        //        $token = (new Builder())->issuedBy($this->sessionData)
+//            ->issuedAt(time())
+//            ->expiresAt(time()+600)
+//            ->withClaim('session-data', $this->sessionData)
+//            ->getToken('HS256',$this->jwtSecret);
+
         $issueTime = time();
 
         $claims = array(
-            "session-data"=> $this->sessionData, //what do you want to preserve over page loads - in this instance this is the email address for the publicapi user - we decide what is placed in session
-            "iat"=>$issueTime,
-            'exp'=>$issueTime + 600
+            /*
+             * Then for every HTTP request you get from the client, the session id (given by the client) will point you to the correct session data (stored by the server) that contains the authenticated user id - that way your code will know what user it is talking to.
+             */
+            "session-data" => $this->sessionData, // who is it attrributed to - this id is stored in the session data then for every request, what do you want to preserve over page loads - in this instance this is the email address for the publicapi user - we decide what is placed in session
+            "iat" => $issueTime,
+            'exp' => $issueTime + 600
         );
 
         var_dump($claims);
 
         //session data in LPA is declared in terraform and it is sent through the parameters - in LPA and File Service, it seems to be the public api opgtest
 
-        $encoded_jwt = JWT::encode($claims,$this->jwtSecret,'HS256');
+        $encoded_jwt = JWT::encode($claims, $this->jwtSecret, 'HS256');
 
         var_dump($encoded_jwt);
 
         return [
-            'Authorization' => 'Bearer '.$encoded_jwt,
+            'Authorization' => 'Bearer ' . $encoded_jwt,
             'Content-Type' => 'application/json'
         ];
 

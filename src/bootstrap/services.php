@@ -39,7 +39,6 @@ $getInProgressDocumentsHandler = new GetInProgressDocumentsHandler(
     $guzzleClient,
     $config['sirius']['in_progress_documents_endpoint'],
     $jwtAuthenticator
-
 );
 $getNotifyStatusHandler = new GetNotifyStatusHandler($notifyClient);
 $updateDocumentStatusHandler = new UpdateDocumentStatusHandler(

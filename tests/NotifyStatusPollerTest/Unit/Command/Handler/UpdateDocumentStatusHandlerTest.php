@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Command\Handler;
 
+use Alphagov\Notifications\Authentication\JWTAuthenticationInterface;
+use NotifyStatusPoller\Authentication\JwtAuthentication;
 use UnexpectedValueException;
 use Psr\Http\Message\ResponseInterface;
 use PHPUnit\Framework\TestCase;
@@ -18,6 +20,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
     private const ENDPOINT = '/update-status';
     private $mockGuzzleClient;
     private $mockNotifyStatusMapper;
+    private $mockAuthenticator;
 
     private UpdateDocumentStatusHandler $handler;
 
@@ -27,9 +30,11 @@ class UpdateDocumentStatusHandlerTest extends TestCase
 
         $this->mockNotifyStatusMapper = $this->createMock(NotifyStatus::class);
         $this->mockGuzzleClient = $this->createMock(GuzzleClient::class);
+        $this->mockAuthenticator = $this->createMock(JwtAuthentication::class);
         $this->handler = new UpdateDocumentStatusHandler(
             $this->mockNotifyStatusMapper,
             $this->mockGuzzleClient,
+            $this->mockAuthenticator,
             self::ENDPOINT
         );
     }
@@ -60,7 +65,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
         $this->mockGuzzleClient
             ->expects(self::once())
             ->method('put')
-            ->with(self::ENDPOINT, ['json' => $payload])
+            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->buildHeaders(),'json' => $payload])
             ->willReturn($mockResponse);
 
         $this->handler->handle($command);
@@ -92,7 +97,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
         $this->mockGuzzleClient
             ->expects(self::once())
             ->method('put')
-            ->with(self::ENDPOINT, ['json' => $payload])
+            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->buildHeaders(),'json' => $payload])
             ->willReturn($mockResponse);
 
         self::expectException(UnexpectedValueException::class);
