@@ -34,19 +34,19 @@ class GetInProgressDocumentsHandlerTest extends TestCase
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
         $response = [
-            ['id' => 1, 'notifySendId' => 'send-id-1'],
-            ['id' => 2, 'notifySendId' => 'send-id-2'],
-            ['id' => 3, 'notifySendId' => 'send-id-3'],
+            ['id' => 1, 'notifyId' => 'send-id-1'],
+            ['id' => 2, 'notifyId' => 'send-id-2'],
+            ['id' => 3, 'notifyId' => 'send-id-3'],
         ];
         $expectedResult = [
             new GetNotifyStatus(
-                ['documentId' => $response[0]['id'], 'notifyId' => $response[0]['notifySendId']]
+                ['documentId' => $response[0]['id'], 'notifyId' => $response[0]['notifyId']]
             ),
             new GetNotifyStatus(
-                ['documentId' => $response[1]['id'], 'notifyId' => $response[1]['notifySendId']]
+                ['documentId' => $response[1]['id'], 'notifyId' => $response[1]['notifyId']]
             ),
             new GetNotifyStatus(
-                ['documentId' => $response[2]['id'], 'notifyId' => $response[2]['notifySendId']]
+                ['documentId' => $response[2]['id'], 'notifyId' => $response[2]['notifyId']]
             ),
         ];
 

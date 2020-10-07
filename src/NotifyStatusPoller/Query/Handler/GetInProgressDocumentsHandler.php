@@ -39,12 +39,9 @@ class GetInProgressDocumentsHandler
         $results = [];
 
         foreach ($documents as $doc) {
-            var_dump($doc);
             $results[] = new GetNotifyStatus([
                 'documentId' => $doc['id'],
                 'notifyId' => $doc['notifyId'],
-                //if I change this to $doc[notifyId] so it matches the group value being set in CorrespondenceController - works buyt functional test busts - need to amend
-                //this to be NotifyId as this is the ID being set - need to change these in the tests then - once done
             ]);
         }
 
