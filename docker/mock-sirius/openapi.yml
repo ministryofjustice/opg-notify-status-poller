@@ -26,11 +26,11 @@ paths:
                   summary: Multiple documents
                   value:
                     - id: 638471
-                      notifySendId: d5d3d70b-869b-4442-bbb2-4db8557e2e2f
+                      notifyId: d5d3d70b-869b-4442-bbb2-4db8557e2e2f
                     - id: 29374
-                      notifySendId: b20aac55-cef9-4a94-850b-45bbc46460c8
+                      notifyId: b20aac55-cef9-4a94-850b-45bbc46460c8
                     - id: 846269
-                      notifySendId: 82c104b6-0e43-4801-a774-4ec977dc12b2
+                      notifyId: 82c104b6-0e43-4801-a774-4ec977dc12b2
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 

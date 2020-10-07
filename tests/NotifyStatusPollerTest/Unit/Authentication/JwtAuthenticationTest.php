@@ -29,7 +29,7 @@ class JwtAuthenticationTest extends TestCase
         $headers = $this->authenticator->buildHeaders();
 
         self::assertArrayHasKey("Authorization", $headers);
-        self::assertArrayHasKey("Content-type", $headers);
+        self::assertArrayHasKey("Content-Type", $headers);
 
         $jwtToken = explode(' ',$headers['Authorization'])[1];
         $decodedJwt=(array)JWT::decode($jwtToken,self::JWT_SECRET, array('HS256'));
