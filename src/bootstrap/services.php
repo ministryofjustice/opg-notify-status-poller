@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use NotifyStatusPoller\Authentication\JwtAuthentication;
+use NotifyStatusPoller\Authentication\JwtAuthenticator;
 use Psr\Log\LoggerInterface;
 use Alphagov\Notifications\Client;
 use GuzzleHttp\Client as GuzzleClient;
@@ -30,7 +30,7 @@ $notifyClient = new Client(
     ]
 );
 
-$jwtAuthenticator = new JwtAuthentication(
+$jwtAuthenticator = new JwtAuthenticator(
     $config['sirius']['jwt_secret'],
     $config['sirius']['session_data']
 );

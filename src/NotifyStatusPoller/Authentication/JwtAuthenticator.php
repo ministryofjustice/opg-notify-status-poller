@@ -8,7 +8,7 @@ use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key;
 
-class JwtAuthentication
+class JwtAuthenticator
 {
     private string $jwtSecret;
     private string $sessionData;
@@ -20,11 +20,11 @@ class JwtAuthentication
     }
 
     /**
-     * Generates the headers expected by the API.
+     * Generates the JWT token expected by the API.
      *
      * @return array<string>
      */
-    public function buildHeaders()
+    public function createToken()
     {
         $token = (new Builder())
             ->withClaim('session-data', $this->sessionData)
@@ -67,9 +67,9 @@ class JwtAuthentication
          */
 
         /*
-         * 5. Change to use the module that Rich says is better for the JWT stuff.
-         * 6. Need to add logic that if a JWT token has been generated and is still valid, to use that instead of generating a new one - have a chat with Rich
-         *
+         * 1. Ready for PR - do we need to add Public api email to AWS - already using JWT token - any further Jenkins testing - see if the log messages are present
+         * 2. PR ready - may need to add unit tests
+         * 3. Documentation for what did so far and how solved issues
          */
     }
 }

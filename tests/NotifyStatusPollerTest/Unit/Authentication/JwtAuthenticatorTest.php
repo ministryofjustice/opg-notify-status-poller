@@ -5,28 +5,28 @@ declare(strict_types=1);
 namespace NotifyStatusPollerTest\Unit\Authentication;
 
 use Firebase\JWT\JWT;
-use NotifyStatusPoller\Authentication\JwtAuthentication;
+use NotifyStatusPoller\Authentication\JwtAuthenticator;
 use PHPUnit\Framework\TestCase;
 
-class JwtAuthenticationTest extends TestCase
+class JwtAuthenticatorTest extends TestCase
 {
     private const JWT_SECRET = 'test';
     private const SESSION_DATA = 'test@test.com';
 
-    private JwtAuthentication $authenticator;
+    private JwtAuthenticator $authenticator;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->authenticator = new JwtAuthentication(
+        $this->authenticator = new JwtAuthenticator(
             self::JWT_SECRET,
             self::SESSION_DATA
         );
     }
 
-    public function testBuildHeadersSuccess(): void
+    public function testCreateTokenSuccess(): void
     {
-        $headers = $this->authenticator->buildHeaders();
+        $headers = $this->authenticator->createToken();
 
         self::assertArrayHasKey("Authorization", $headers);
         self::assertArrayHasKey("Content-Type", $headers);
@@ -35,7 +35,7 @@ class JwtAuthenticationTest extends TestCase
         $decodedJwt=(array)JWT::decode($jwtToken,self::JWT_SECRET, array('HS256'));
 
         self::assertArrayHasKey('session-data', $decodedJwt);
-        self::assertEquals('test@test.com', $decodedJwt['session-data']);
+        self::assertEquals(self::SESSION_DATA, $decodedJwt['session-data']);
         self::assertArrayHasKey('iat', $decodedJwt);
         self::assertArrayHasKey('exp', $decodedJwt);
     }

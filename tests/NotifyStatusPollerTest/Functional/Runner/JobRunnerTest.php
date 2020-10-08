@@ -7,7 +7,7 @@ namespace NotifyStatusPollerTest\Functional\Runner;
 use Alphagov\Notifications\Client as NotifyClient;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
-use NotifyStatusPoller\Authentication\JwtAuthentication;
+use NotifyStatusPoller\Authentication\JwtAuthenticator;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
@@ -40,7 +40,7 @@ class JobRunnerTest extends TestCase
             'httpClient' => $guzzleClient,
             'baseUrl' => $config['notify']['base_url'],
         ]);
-        $jwtAuthenticator = new JwtAuthentication(
+        $jwtAuthenticator = new JwtAuthenticator(
             $config['sirius']['jwt_secret'],
             $config['sirius']['session_data']
         );

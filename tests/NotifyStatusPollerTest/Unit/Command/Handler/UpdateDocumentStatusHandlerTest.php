@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Command\Handler;
 
-use NotifyStatusPoller\Authentication\JwtAuthentication;
+use NotifyStatusPoller\Authentication\JwtAuthenticator;
 use UnexpectedValueException;
 use Psr\Http\Message\ResponseInterface;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +29,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
 
         $this->mockNotifyStatusMapper = $this->createMock(NotifyStatus::class);
         $this->mockGuzzleClient = $this->createMock(GuzzleClient::class);
-        $this->mockAuthenticator = $this->createMock(JwtAuthentication::class);
+        $this->mockAuthenticator = $this->createMock(JwtAuthenticator::class);
         $this->handler = new UpdateDocumentStatusHandler(
             $this->mockNotifyStatusMapper,
             $this->mockGuzzleClient,
@@ -57,14 +57,13 @@ class UpdateDocumentStatusHandlerTest extends TestCase
             ->with($command->getNotifyStatus())
             ->willReturn($siriusStatus);
 
-
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockResponse->expects(self::once())->method('getStatusCode')->willReturn(204);
 
         $this->mockGuzzleClient
             ->expects(self::once())
             ->method('put')
-            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->buildHeaders(),'json' => $payload])
+            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->createToken(),'json' => $payload])
             ->willReturn($mockResponse);
 
         $this->handler->handle($command);
@@ -96,7 +95,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
         $this->mockGuzzleClient
             ->expects(self::once())
             ->method('put')
-            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->buildHeaders(),'json' => $payload])
+            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->createToken(),'json' => $payload])
             ->willReturn($mockResponse);
 
         self::expectException(UnexpectedValueException::class);
