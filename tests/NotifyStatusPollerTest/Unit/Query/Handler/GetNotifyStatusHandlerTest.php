@@ -6,6 +6,7 @@ namespace NotifyStatusPollerTest\Unit\Query\Handler;
 
 use Alphagov\Notifications\Exception\NotifyException;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 use PHPUnit\Framework\TestCase;
@@ -56,7 +57,7 @@ class GetNotifyStatusHandlerTest extends TestCase
 
         $this->notifyClientMock->expects(self::once())->method('getNotification')->willReturn($response);
 
-        self::expectException(NotifyException::class);
+        self::expectException(NotificationNotFoundException::class);
         self::expectExceptionMessage(
             sprintf('Notification not found for document ID: ' , $response['id'])
         );

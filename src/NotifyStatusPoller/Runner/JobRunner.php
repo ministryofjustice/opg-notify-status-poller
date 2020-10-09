@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Runner;
 
-use Alphagov\Notifications\Exception\NotifyException;
-use Exception;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
 use Throwable;
 use Psr\Log\LoggerInterface;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
@@ -68,7 +67,7 @@ class JobRunner
                 $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
                 $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
                 $updatedCount++;
-            } catch (NotifyException $e) {
+            } catch (NotificationNotFoundException $e) {
                 $this->logger
                     ->info(
                         $e->getMessage(),

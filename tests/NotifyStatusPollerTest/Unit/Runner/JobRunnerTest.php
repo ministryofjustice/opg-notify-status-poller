@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NotifyStatusPollerTest\Unit\Runner;
 
 use Alphagov\Notifications\Exception\NotifyException;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
 use Throwable;
 use Exception;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
@@ -173,7 +174,7 @@ class JobRunnerTest extends TestCase
      */
     public function test_run_thrown_null_from_notify_handler_is_logged(): void
     {
-        $expectedException = new NotifyException('Oops');
+        $expectedException = new NotificationNotFoundException('Oops');
 
         $inProgressDocuments = [
             new GetNotifyStatus([
