@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use NotifyStatusPoller\Authentication\JwtAuthenticator;
 use Psr\Log\LoggerInterface;
 use Alphagov\Notifications\Client;
 use GuzzleHttp\Client as GuzzleClient;
@@ -28,14 +29,22 @@ $notifyClient = new Client(
         'baseUrl' => $config['notify']['base_url'],
     ]
 );
+
+$jwtAuthenticator = new JwtAuthenticator(
+    $config['sirius']['jwt_secret'],
+    $config['sirius']['session_data']
+);
+
 $getInProgressDocumentsHandler = new GetInProgressDocumentsHandler(
     $guzzleClient,
-    $config['sirius']['in_progress_documents_endpoint']
+    $config['sirius']['in_progress_documents_endpoint'],
+    $jwtAuthenticator
 );
 $getNotifyStatusHandler = new GetNotifyStatusHandler($notifyClient);
 $updateDocumentStatusHandler = new UpdateDocumentStatusHandler(
     $notifyStatusMapper,
     $guzzleClient,
+    $jwtAuthenticator,
     $config['sirius']['update_status_endpoint']
 );
 

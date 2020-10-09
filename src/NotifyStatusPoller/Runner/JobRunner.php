@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Runner;
 
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
 use Throwable;
 use Psr\Log\LoggerInterface;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
@@ -66,6 +67,12 @@ class JobRunner
                 $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
                 $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
                 $updatedCount++;
+            } catch (NotificationNotFoundException $e) {
+                $this->logger
+                    ->info(
+                        $e->getMessage(),
+                        ['context' => Context::NOTIFY_POLLER]
+                    );
             } catch (Throwable $e) {
                 $this->logger
                     ->critical(

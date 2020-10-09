@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Runner;
 
+use Alphagov\Notifications\Exception\NotifyException;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
 use Throwable;
 use Exception;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
@@ -165,6 +167,40 @@ class JobRunnerTest extends TestCase
         self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
         self::assertTrue($this->logger->hasInfoThatContains('Start'));
         self::assertTrue($this->logger->hasInfoThatContains('Finished'));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function test_run_thrown_null_from_notify_handler_is_logged(): void
+    {
+        $expectedException = new NotificationNotFoundException('Oops');
+
+        $inProgressDocuments = [
+            new GetNotifyStatus([
+                'documentId' => 100,
+                'notifyId' => 'ref-1',
+            ]),
+        ];
+
+        $this->getInProgressDocumentsHandlerMock
+            ->expects(self::once())
+            ->method('handle')
+            ->willReturn($inProgressDocuments);
+
+        $this->getNotifyStatusHandlerMock
+            ->method('handle')
+            ->willThrowException($expectedException);
+
+        $this->updateDocumentStatusHandlerMock->expects(self::never())->method('handle');
+
+        $this->jobRunner->run();
+
+        self::assertTrue($this->logger->hasInfoThatContains('Start'));
+        self::assertTrue($this->logger->hasInfoThatContains('Updating'));
+        self::assertTrue($this->logger->hasInfoThatContains($expectedException->getMessage()));
+        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
+
     }
 
     /**
