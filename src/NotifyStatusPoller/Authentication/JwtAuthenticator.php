@@ -26,17 +26,12 @@ class JwtAuthenticator
      */
     public function createToken()
     {
-        var_dump($this->jwtSecret);
-        var_dump($this->sessionData);
-
         $token = (new Builder())
             ->withClaim('session-data', $this->sessionData)
             ->issuedAt(time())
             ->expiresAt(time() + 600)
             ->getToken(new Sha256(), new Key($this->jwtSecret))
         ;
-
-        var_dump($token);
 
         return [
             'Authorization' => 'Bearer ' . $token,
