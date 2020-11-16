@@ -30,8 +30,7 @@ class JwtAuthenticator
             ->withClaim('session-data', $this->sessionData)
             ->issuedAt(time())
             ->expiresAt(time() + 600)
-            ->getToken(new Sha256(), new Key($this->jwtSecret))
-        ;
+            ->getToken(new Sha256(), new Key($this->jwtSecret));
 
         return [
             'Authorization' => 'Bearer ' . $token,
