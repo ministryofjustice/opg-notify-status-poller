@@ -19,7 +19,7 @@ return [
         'in_progress_documents_endpoint' =>
             getenv('OPG_SIRIUS_IN_PROGRESS_DOCUMENTS_ENDPOINT') ?: '/list-in-progress',
         'update_status_endpoint' => getenv('OPG_SIRIUS_UPDATE_STATUS_ENDPOINT') ?: '/update-status',
-        'jwt_secret' => getenv('JWT_SECRET') === false ? 'THiSiSaSeCrEt' : getenv('JWT_SECRET'),
+        'jwt_secret' => getenv('JWT_SECRET') === false ? 'SeCrEtKeYkNoWnOnLyToMe' : getenv('JWT_SECRET'),
         'session_data' => getenv('SESSION_DATA') === false ? 'publicapi@opgtest.com' : getenv('SESSION_DATA')
     ],
 ];
