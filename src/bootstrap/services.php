@@ -32,7 +32,7 @@ $notifyClient = new Client(
 
 $jwtAuthenticator = new JwtAuthenticator(
     $config['sirius']['jwt_secret'],
-    $config['sirius']['session_data']
+    $config['sirius']['api_user_email']
 );
 
 $getInProgressDocumentsHandler = new GetInProgressDocumentsHandler(
