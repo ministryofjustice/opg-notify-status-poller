@@ -66,6 +66,13 @@ jobs:
       - name: Check Coverage
         run: |
           php -f scripts/coverage-checker.php test-results/clover/results.xml 100
+
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: |
+            ./test-results/coverage
   
   test-functional:
     name: Functional Testing
@@ -75,22 +82,17 @@ jobs:
       - run: |
           cp local.env.example local.env
           chmod +x scripts/wait-for-prism.sh
-      - name: Build consumer dev image
+      - name: Build job-runner
         run: |
-          docker-compose build consumer
-      - name: Setup Localstack
-        run: |
-          docker-compose up -d localstack
-          chmod +x ./scripts/localstack/wait-for-localstack-ready.sh
-          ./scripts/localstack/wait-for-localstack-ready.sh
+          docker-compose build job-runner
       - name: Start Mock Notify
         run: |
           docker-compose up --build --force-recreate -d mock-notify-ci
-          ./scripts/wait-for-prism.sh consumer-mock-notify
+          ./scripts/wait-for-prism.sh mock-notify
       - name: Start Mock Sirius
         run: |
           docker-compose up --build --force-recreate -d mock-sirius-ci
-          ./scripts/wait-for-prism.sh consumer-mock-sirius
+          ./scripts/wait-for-prism.sh mock-sirius
       
       - name: Run Functional Tests
         run: |
@@ -126,18 +128,15 @@ jobs:
   metrics:
     name: Metrics
     runs-on: ubuntu-latest
+    # uses this container as setup-php doesn't support phpmetrics yet
+    container: jakzal/phpqa:php7.4-alpine
     steps:
       - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          tools: phpmetrics
-
       - name: Generate report
+        shell: sh
         run: |
-          phpmetrics \
-          --report-html=./test-results/phpmetrics \
-          src/NotifyStatusPoller
+          phpmetrics --report-html=./test-results/phpmetrics src/NotifyStatusPoller
+
       - name: Upload Metrics
         uses: actions/upload-artifact@v2
         with:
@@ -193,15 +192,15 @@ jobs:
       - name: Push Container
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          NOTIFY_CONSUMER_ECR_REPOSITORY: notify-status-poller
+          NOTIFY_POLLER_ECR_REPOSITORY: notify-status-poller
         run: |
-          docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_CONSUMER_ECR_REPOSITORY:latest
-          docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_CONSUMER_ECR_REPOSITORY:${{ steps.bump_version.outputs.tag }}
+          docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:latest
+          docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:${{ steps.bump_version.outputs.tag }}
           if [ $BRANCH_NAME == "main" ]; then
             # We want all of the tags pushed
-            docker push $ECR_REGISTRY/$NOTIFY_CONSUMER_ECR_REPOSITORY
+            docker push $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY
           else
-            docker push $ECR_REGISTRY/$NOTIFY_CONSUMER_ECR_REPOSITORY:${{ steps.bump_version.outputs.tag }}
+            docker push $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:${{ steps.bump_version.outputs.tag }}
           fi
       
   push-tags:
