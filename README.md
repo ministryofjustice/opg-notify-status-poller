@@ -1,6 +1,6 @@
 # opg-notify-status-poller
 
-[![ministryofjustice](https://circleci.com/gh/ministryofjustice/opg-notify-status-poller.svg?style=svg)](https://github.com/ministryofjustice/opg-notify-status-poller)
+![Build Status](https://github.com/ministryofjustice/opg-notify-status-poller/actions/workflows/build.yml/badge.svg)
 
 ## Building
 
