@@ -39,5 +39,4 @@ class JwtAuthenticatorTest extends TestCase
         self::assertArrayHasKey('iat', $decodedJwt);
         self::assertArrayHasKey('exp', $decodedJwt);
     }
-
 }
