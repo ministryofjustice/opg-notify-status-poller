@@ -22,6 +22,11 @@ class NotifyStatus
     public const CANCELLED = 'cancelled';
     public const TECHNICAL_FAILURE = 'technical-failure';
     public const PERMANENT_FAILURE = 'permanent-failure';
+    public const TEMPORARY_FAILURE = 'temporary-failure';
+
+    public const CREATED = 'created';
+    public const SENDING = 'sending';
+    public const DELIVERED = 'delivered';
 
     public const STATUSES = [
         self::FAILED => self::SIRIUS_REJECTED,
@@ -33,6 +38,10 @@ class NotifyStatus
         self::CANCELLED => self::SIRIUS_REJECTED,
         self::TECHNICAL_FAILURE => self::SIRIUS_REJECTED,
         self::PERMANENT_FAILURE => self::SIRIUS_REJECTED,
+        self::TEMPORARY_FAILURE => self::SIRIUS_REJECTED,
+        self::CREATED => self::SIRIUS_POSTING,
+        self::SENDING => self::SIRIUS_POSTING,
+        self::DELIVERED => self::SIRIUS_POSTED
     ];
 
     public function toSirius(string $notifyStatus): string
