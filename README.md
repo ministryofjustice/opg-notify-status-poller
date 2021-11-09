@@ -11,7 +11,7 @@
     cp local.env.example local.env
     
     # Install dependencies on your host machine
-    phpqa composer install --prefer-dist --no-interaction --no-scripts
+    composer install --prefer-dist --no-interaction --no-scripts
     
     # Update the local.env file with any secret credentials when testing external services
     docker-compose build job-runner

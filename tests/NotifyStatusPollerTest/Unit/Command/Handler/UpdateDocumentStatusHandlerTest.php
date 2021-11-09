@@ -110,7 +110,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
     {
         return new UpdateDocumentStatus([
             'notifyId' => '1',
-            'notifyStatus' => NotifyStatus::ACCEPTED,
+            'notifyStatus' => NotifyStatus::SIRIUS_POSTING,
             'documentId' => '4545',
         ]);
     }
