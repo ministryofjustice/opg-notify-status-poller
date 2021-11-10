@@ -38,6 +38,10 @@ class NotifyStatusTest extends TestCase
             ['cancelled', 'rejected'],
             ['technical-failure', 'rejected'],
             ['permanent-failure', 'rejected'],
+            ['temporary-failure', 'rejected'],
+            ['created', 'posting'],
+            ['sending', 'posting'],
+            ['delivered', 'posted'],
         ];
     }
 
