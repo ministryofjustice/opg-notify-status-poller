@@ -9,10 +9,14 @@ use UnexpectedValueException;
 use Psr\Http\Message\ResponseInterface;
 use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Mapper\NotifyStatus;
+use Psr\Log\LoggerInterface;
 
 class UpdateDocumentStatusHandlerTest extends TestCase
 {
@@ -20,6 +24,7 @@ class UpdateDocumentStatusHandlerTest extends TestCase
     private $mockGuzzleClient;
     private $mockNotifyStatusMapper;
     private $mockAuthenticator;
+    private $mockLogger;
 
     private UpdateDocumentStatusHandler $handler;
 
@@ -30,10 +35,12 @@ class UpdateDocumentStatusHandlerTest extends TestCase
         $this->mockNotifyStatusMapper = $this->createMock(NotifyStatus::class);
         $this->mockGuzzleClient = $this->createMock(GuzzleClient::class);
         $this->mockAuthenticator = $this->createMock(JwtAuthenticator::class);
+        $this->mockLogger = $this->createMock(LoggerInterface::class);
         $this->handler = new UpdateDocumentStatusHandler(
             $this->mockNotifyStatusMapper,
             $this->mockGuzzleClient,
             $this->mockAuthenticator,
+            $this->mockLogger,
             self::ENDPOINT
         );
     }
@@ -102,6 +109,41 @@ class UpdateDocumentStatusHandlerTest extends TestCase
         self::expectExceptionMessage(
             sprintf('Expected status "%s" but received "%s"', 204, $mockResponse->getStatusCode())
         );
+
+        $this->handler->handle($command);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function testErrorResponseStatusCodeFailure(): void
+    {
+        $command = $this->createUpdateDocumentStatusCommand();
+        $siriusStatus = 'status';
+        $payload = [
+            'documentId' => $command->getDocumentId(),
+            'notifySendId' => $command->getNotifyId(),
+            'notifyStatus' => $siriusStatus,
+        ];
+
+        $this->mockNotifyStatusMapper
+            ->expects(self::once())
+            ->method('toSirius')
+            ->with($command->getNotifyStatus())
+            ->willReturn($siriusStatus);
+     
+        $this->mockGuzzleClient
+            ->expects(self::once())
+            ->method('put')
+            ->with(self::ENDPOINT, ['headers' => $this->mockAuthenticator->createToken(),'json' => $payload])
+            ->willThrowException(new ClientException('some message', new Request('put', '/'), new Response(404, [], 'this is the problem')));
+
+        $this->mockLogger
+            ->expects(self::once())
+            ->method('info')
+            ->with('some message', ['body' => 'this is the problem']);
+        
+        $this->expectException(ClientException::class);
 
         $this->handler->handle($command);
     }
