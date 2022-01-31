@@ -54,6 +54,7 @@ class JobRunnerTest extends TestCase
             $notifyStatusMapper,
             $guzzleClient,
             $jwtAuthenticator,
+            $this->logger,
             $config['sirius']['update_status_endpoint']
         );
 
