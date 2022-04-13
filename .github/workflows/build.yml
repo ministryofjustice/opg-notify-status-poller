@@ -160,6 +160,10 @@ jobs:
         run: |
           docker build --file docker/Dockerfile --tag notify-status-poller:latest .
 
+
+      - name: Git work around for versioning
+        run : sudo chown root .
+
       - name: Bump version
         id: bump_version
         uses: anothrNick/github-tag-action@1.33.0
