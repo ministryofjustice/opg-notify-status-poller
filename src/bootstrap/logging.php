@@ -42,15 +42,7 @@ function exception_handler(Throwable $e): void
     exit(1);
 }
 
-/**
- * @param int          $errno
- * @param string       $errstr
- * @param string       $errfile
- * @param int          $errline
- * @param array<mixed> $errcontext Deprecated - do not use
- * @return bool
- */
-function error_handler($errno, $errstr, $errfile, $errline, $errcontext): bool
+function error_handler(int $errno, string $errstr, string $errfile, int $errline): bool
 {
     global $psrLoggerAdapter;
 
