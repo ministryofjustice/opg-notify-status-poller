@@ -31,6 +31,7 @@ class GetNotifyStatusHandlerTest extends TestCase
         $response = [
             'id' => $getNotifyStatus->getNotifyId(),
             'status' => 'notify-status',
+            'type' => 'email',
         ];
 
         $this->notifyClientMock->expects(self::once())->method('getNotification')->willReturn($response);
@@ -41,6 +42,7 @@ class GetNotifyStatusHandlerTest extends TestCase
         self::assertSame($response['id'], $updateDocumentStatus->getNotifyId());
         self::assertSame($response['status'], $updateDocumentStatus->getNotifyStatus());
         self::assertSame($getNotifyStatus->getNotifyId(), $updateDocumentStatus->getNotifyId());
+        self::assertSame($response['type'], $updateDocumentStatus->getSendByMethod());
     }
 
     public function test_handle_returns_error_when_notification_retrieval_unsuccessful(): void

@@ -37,10 +37,13 @@ class GetNotifyStatusHandler
             throw new NotificationNotFoundException("Notification not found for document ID: " . $query->getDocumentId());
         }
 
-        return new UpdateDocumentStatus([
-            'documentId' => $query->getDocumentId(),
-            'notifyId' => $query->getNotifyId(),
-            'notifyStatus' => $response['status'],
-        ]);
+        return new UpdateDocumentStatus(
+            [
+                'documentId' => $query->getDocumentId(),
+                'notifyId' => $query->getNotifyId(),
+                'notifyStatus' => $response['status'],
+                'sendByMethod' => $response['type'],
+            ]
+        );
     }
 }
