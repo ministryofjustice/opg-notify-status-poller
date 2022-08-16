@@ -11,6 +11,7 @@ class UpdateDocumentStatus
     protected int $documentId;
     protected string $notifyId;
     protected string $notifyStatus;
+    protected string $sendByMethod;
 
     /**
      * @param array<string,mixed> $data
@@ -31,11 +32,16 @@ class UpdateDocumentStatus
             AggregateValidationException::addError('Data doesn\'t contain a notifyStatus');
         }
 
+        if (empty($data['sendByMethod'])) {
+            AggregateValidationException::addError('Data doesn\'t contain a sendByMethod');
+        }
+
         AggregateValidationException::checkAndThrow();
 
         $this->documentId = (int)$data['documentId'];
         $this->notifyId = $data['notifyId'];
         $this->notifyStatus = $data['notifyStatus'];
+        $this->sendByMethod = $data['sendByMethod'];
     }
 
     public function getDocumentId(): int
@@ -51,5 +57,10 @@ class UpdateDocumentStatus
     public function getNotifyStatus(): string
     {
         return $this->notifyStatus;
+    }
+
+    public function getSendByMethod(): string
+    {
+        return $this->sendByMethod;
     }
 }

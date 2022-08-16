@@ -34,12 +34,14 @@ paths:
                     status: validation-failed
                     id: 9a83b0bb-a534-41a5-849f-dbc39aee4d3d
                     reference: "1234"
+                    type: "email"
                 pending-virus-check:
                   summary: Pending virus check
                   value:
                     status: pending-virus-check
                     id: 9a83b0bb-a534-41a5-849f-dbc39aee4d3d
                     reference: "1234"
+                    type: "email"
         '400':
           description: Error
           content:
