@@ -1,4 +1,4 @@
-FROM stoplight/prism:3
+FROM stoplight/prism:4
 
 COPY docker/mock-sirius/openapi.yml /app/mock-sirius/openapi.yml
 
