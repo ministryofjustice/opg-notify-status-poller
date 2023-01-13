@@ -41,7 +41,7 @@ jobs:
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v2
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
@@ -71,7 +71,7 @@ jobs:
         run: |
           sudo sed -i 's/\/app\///g' test-results/clover/results.xml
           sudo sed -i 's/\/app\///g' test-results/unit/results.xml
-          
+
       - name: Run SonarQube
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -114,7 +114,7 @@ jobs:
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v2
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
