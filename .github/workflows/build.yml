@@ -161,6 +161,21 @@ jobs:
         run: |
           docker build --file docker/Dockerfile --tag notify-status-poller:latest .
 
+      - name: Trivy Image Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: notify-status-poller:latest
+          severity: 'MEDIUM,HIGH,CRITICAL'
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
       - name: Bump version
         id: bump_version
         uses: anothrNick/github-tag-action@1.55.0
