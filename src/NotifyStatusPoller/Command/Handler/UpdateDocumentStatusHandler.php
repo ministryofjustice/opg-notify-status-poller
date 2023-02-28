@@ -42,7 +42,8 @@ class UpdateDocumentStatusHandler
             'notifySendId' => $command->getNotifyId(),
             'notifyStatus' => $this->notifyStatusMapper->toSirius($command->getNotifyStatus()),
             'notifySubStatus' => $command->getNotifyStatus(),
-            'sendByMethod' => $command->getSendByMethod()
+            'sendByMethod' => $command->getSendByMethod(),
+            'recipientEmailAddress' => $command->getRecipientEmailAddress()
         ];
 
         $guzzleResponse = $this->guzzleClient->put(
