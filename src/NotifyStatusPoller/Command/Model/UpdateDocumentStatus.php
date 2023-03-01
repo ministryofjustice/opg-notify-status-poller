@@ -12,6 +12,7 @@ class UpdateDocumentStatus
     protected string $notifyId;
     protected string $notifyStatus;
     protected string $sendByMethod;
+    protected string $recipientEmailAddress;
 
     /**
      * @param array<string,mixed> $data
@@ -36,12 +37,17 @@ class UpdateDocumentStatus
             AggregateValidationException::addError('Data doesn\'t contain a sendByMethod');
         }
 
+        if (empty($data['recipientEmailAddress'])) {
+            AggregateValidationException::addError('Data doesn\'t contain a recipientEmailAddress');
+        }
+
         AggregateValidationException::checkAndThrow();
 
         $this->documentId = (int)$data['documentId'];
         $this->notifyId = $data['notifyId'];
         $this->notifyStatus = $data['notifyStatus'];
         $this->sendByMethod = $data['sendByMethod'];
+        $this->recipientEmailAddress = $data['recipientEmailAddress'];
     }
 
     public function getDocumentId(): int
@@ -62,5 +68,10 @@ class UpdateDocumentStatus
     public function getSendByMethod(): string
     {
         return $this->sendByMethod;
+    }
+
+    public function getRecipientEmailAddress(): string
+    {
+        return $this->recipientEmailAddress;
     }
 }
