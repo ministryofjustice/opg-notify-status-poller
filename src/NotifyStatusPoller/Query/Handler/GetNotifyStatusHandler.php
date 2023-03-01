@@ -43,7 +43,7 @@ class GetNotifyStatusHandler
                 'notifyId' => $query->getNotifyId(),
                 'notifyStatus' => $response['status'],
                 'sendByMethod' => $response['type'],
-                'recipientEmailAddress' => $response['recipientEmailAddress']
+                'recipientEmailAddress' => $response['email_address']
             ]
         );
     }

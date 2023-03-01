@@ -19,6 +19,7 @@ require_once __DIR__ . '/../src/bootstrap/logging.php';
 try {
     require_once __DIR__ . '/../src/bootstrap/services.php';
 
+    /** @phpstan-ignore-next-line */
     while ($doRunLoop) {
         $jobRunner->run();
 

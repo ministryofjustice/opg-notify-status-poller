@@ -16,7 +16,8 @@ class UpdateDocumentStatusTest extends TestCase
             'notifyId' => '1',
             'notifyStatus' => 'accepted',
             'documentId' => '4545',
-            'sendByMethod' => 'email'
+            'sendByMethod' => 'email',
+            'recipientEmailAddress' => 'test@test.com'
         ];
 
         $command = new UpdateDocumentStatus($data);
@@ -57,6 +58,14 @@ class UpdateDocumentStatusTest extends TestCase
                 ['notifyId' => '1', 'notifyStatus' => 'accepted'],
                 'Data doesn\'t contain a numeric documentId'
             ],
+            'missing sendByMethod' => [
+                ['notifyId' => '1', 'notifyStatus' => 'accepted', 'documentId' => '4545', 'recipientEmailAddress' => 'test@test.com'],
+                'Data doesn\'t contain a sendByMethod'
+            ],
+            'missing recipientEmailAddress' => [
+                ['notifyId' => '1', 'notifyStatus' => 'accepted', 'documentId' => '4545', 'sendByMethod' => 'email'],
+                'Data doesn\'t contain a recipientEmailAddress'
+            ],
             'non-numeric documentId' => [
                 ['notifyId' => '1', 'notifyStatus' => 'accepted', 'documentId' => 'word'],
                 'Data doesn\'t contain a numeric documentId'
@@ -67,6 +76,8 @@ class UpdateDocumentStatusTest extends TestCase
                         'Data doesn\'t contain a numeric documentId',
                         'Data doesn\'t contain a notifyId',
                         'Data doesn\'t contain a notifyStatus',
+                        'Data doesn\'t contain a sendByMethod',
+                        'Data doesn\'t contain a recipientEmailAddress',
                     ]
                 ),
             ],
