@@ -21,7 +21,7 @@ class GetNotifyStatusHandlerTest extends TestCase
         $this->notifyClientMock = $this->createMock(NotifyClient::class);
     }
 
-    public function test_handle_returns_populated_model_on_success(): void
+    public function test_handle_returns_populated_model_on_supervision_success(): void
     {
         $getNotifyStatus = new GetNotifyStatus([
             'documentId' => '1234',
@@ -32,6 +32,7 @@ class GetNotifyStatusHandlerTest extends TestCase
             'id' => $getNotifyStatus->getNotifyId(),
             'status' => 'notify-status',
             'type' => 'email',
+            'email_address' => 'test@test.com'
         ];
 
         $this->notifyClientMock->expects(self::once())->method('getNotification')->willReturn($response);
@@ -43,6 +44,32 @@ class GetNotifyStatusHandlerTest extends TestCase
         self::assertSame($response['status'], $updateDocumentStatus->getNotifyStatus());
         self::assertSame($getNotifyStatus->getNotifyId(), $updateDocumentStatus->getNotifyId());
         self::assertSame($response['type'], $updateDocumentStatus->getSendByMethod());
+        self::assertSame($response['email_address'], $updateDocumentStatus->getRecipientEmailAddress());
+    }
+
+    public function test_handle_returns_populated_model_on_lpa_success(): void
+    {
+        $getNotifyStatus = new GetNotifyStatus([
+            'documentId' => '1234',
+            'notifyId' => '1234',
+        ]);
+        $handler = new GetNotifyStatusHandler($this->notifyClientMock);
+        $response = [
+            'id' => $getNotifyStatus->getNotifyId(),
+            'status' => 'notify-status',
+            'type' => 'letter'
+        ];
+
+        $this->notifyClientMock->expects(self::once())->method('getNotification')->willReturn($response);
+
+        $updateDocumentStatus = $handler->handle($getNotifyStatus);
+
+        self::assertInstanceOf(UpdateDocumentStatus::class, $updateDocumentStatus);
+        self::assertSame($response['id'], $updateDocumentStatus->getNotifyId());
+        self::assertSame($response['status'], $updateDocumentStatus->getNotifyStatus());
+        self::assertSame($getNotifyStatus->getNotifyId(), $updateDocumentStatus->getNotifyId());
+        self::assertSame($response['type'], $updateDocumentStatus->getSendByMethod());
+        self::assertSame(null, $updateDocumentStatus->getRecipientEmailAddress());
     }
 
     public function test_handle_returns_error_when_notification_retrieval_unsuccessful(): void
