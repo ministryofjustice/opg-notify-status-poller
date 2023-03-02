@@ -61,12 +61,14 @@ class JobRunnerTest extends TestCase
                 'notifyId' => 'ref-1',
                 'notifyStatus' => 'status-1',
                 'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com'
             ]),
             new UpdateDocumentStatus([
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
                 'notifyStatus' => 'status-2',
                 'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com'
             ]),
         ];
 
@@ -136,12 +138,14 @@ class JobRunnerTest extends TestCase
                 'notifyId' => 'ref-1',
                 'notifyStatus' => 'status-1',
                 'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com'
             ]),
             new UpdateDocumentStatus([
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
                 'notifyStatus' => 'status-2',
                 'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com'
             ]),
         ];
 
@@ -229,12 +233,14 @@ class JobRunnerTest extends TestCase
                 'notifyId' => 'ref-1',
                 'notifyStatus' => 'status-1',
                 'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com'
             ]),
             new UpdateDocumentStatus([
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
                 'notifyStatus' => 'status-2',
                 'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com'
             ]),
         ];
 

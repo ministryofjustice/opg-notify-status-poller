@@ -35,6 +35,7 @@ paths:
                     id: 9a83b0bb-a534-41a5-849f-dbc39aee4d3d
                     reference: "1234"
                     type: "email"
+                    email_address: "test@test.com"
                 pending-virus-check:
                   summary: Pending virus check
                   value:
@@ -42,6 +43,7 @@ paths:
                     id: 9a83b0bb-a534-41a5-849f-dbc39aee4d3d
                     reference: "1234"
                     type: "email"
+                    email_address: "test@test.com"
         '400':
           description: Error
           content:
