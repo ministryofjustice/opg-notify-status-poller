@@ -10,7 +10,7 @@ use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 
 class UpdateDocumentStatusTest extends TestCase
 {
-    public function testFromArraySuccess(): void
+    public function testFromArraySuccessSupervision(): void
     {
         $data = [
             'notifyId' => '1',
@@ -25,6 +25,27 @@ class UpdateDocumentStatusTest extends TestCase
         self::assertEquals($data['notifyId'], $command->getNotifyId());
         self::assertEquals($data['notifyStatus'], $command->getNotifyStatus());
         self::assertEquals($data['documentId'], $command->getDocumentId());
+        self::assertEquals($data['sendByMethod'], $command->getSendByMethod());
+        self::assertEquals($data['recipientEmailAddress'], $command->getRecipientEmailAddress());
+    }
+
+    public function testFromArraySuccessLpa(): void
+    {
+        $data = [
+            'notifyId' => '1',
+            'notifyStatus' => 'accepted',
+            'documentId' => '4545',
+            'sendByMethod' => 'post',
+            'recipientEmailAddress' => null
+        ];
+
+        $command = new UpdateDocumentStatus($data);
+
+        self::assertEquals($data['notifyId'], $command->getNotifyId());
+        self::assertEquals($data['notifyStatus'], $command->getNotifyStatus());
+        self::assertEquals($data['documentId'], $command->getDocumentId());
+        self::assertEquals($data['sendByMethod'], $command->getSendByMethod());
+        self::assertEquals($data['recipientEmailAddress'], $command->getRecipientEmailAddress());
     }
 
     /**
@@ -62,22 +83,17 @@ class UpdateDocumentStatusTest extends TestCase
                 ['notifyId' => '1', 'notifyStatus' => 'accepted', 'documentId' => '4545', 'recipientEmailAddress' => 'test@test.com'],
                 'Data doesn\'t contain a sendByMethod'
             ],
-            'missing recipientEmailAddress' => [
-                ['notifyId' => '1', 'notifyStatus' => 'accepted', 'documentId' => '4545', 'sendByMethod' => 'email'],
-                'Data doesn\'t contain a recipientEmailAddress'
-            ],
             'non-numeric documentId' => [
                 ['notifyId' => '1', 'notifyStatus' => 'accepted', 'documentId' => 'word'],
                 'Data doesn\'t contain a numeric documentId'
             ],
-            'missing all' => [
+            'missing mandatory' => [
                 [],
                 implode(', ', [
                         'Data doesn\'t contain a numeric documentId',
                         'Data doesn\'t contain a notifyId',
                         'Data doesn\'t contain a notifyStatus',
-                        'Data doesn\'t contain a sendByMethod',
-                        'Data doesn\'t contain a recipientEmailAddress',
+                        'Data doesn\'t contain a sendByMethod'
                     ]
                 ),
             ],
