@@ -8,7 +8,7 @@
     "alphagov/notifications-php-client": "^4.0",
     "guzzlehttp/guzzle": "^7.0",
     "guzzlehttp/psr7": "^1.6",
-    "lcobucci/jwt": "^4.1"
+    "lcobucci/jwt": "^5.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.2"
