@@ -1,6 +1,7 @@
 name: Test & Build
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -165,7 +166,6 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: notify-status-poller:latest
-          severity: 'MEDIUM,HIGH,CRITICAL'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
