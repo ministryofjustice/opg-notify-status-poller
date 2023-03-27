@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Runner;
 
-use Alphagov\Notifications\Exception\NotifyException;
-use NotifyStatusPoller\Exception\NotificationNotFoundException;
-use Throwable;
 use Exception;
-use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
-use NotifyStatusPoller\Query\Model\GetNotifyStatus;
-use Psr\Log\LogLevel;
-use Psr\Log\Test\TestLogger;
-use PHPUnit\Framework\TestCase;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
+use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
+use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 use NotifyStatusPoller\Runner\JobRunner;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LogLevel;
+use Psr\Log\Test\TestLogger;
+use RuntimeException;
+use Throwable;
 
 class JobRunnerTest extends TestCase
 {
@@ -80,13 +80,23 @@ class JobRunnerTest extends TestCase
         $this->getNotifyStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->withConsecutive([$inProgressDocuments[0]], [$inProgressDocuments[1]])
-            ->willReturnOnConsecutiveCalls($updateDocumentStatuses[0], $updateDocumentStatuses[1]);
+            ->willReturnCallback(fn ($value) => match($value)
+                {
+                    $inProgressDocuments[0] => $updateDocumentStatuses[0],
+                    $inProgressDocuments[1] => $updateDocumentStatuses[1],
+                    default => throw new \LogicException()
+                }
+            );
 
         $this->updateDocumentStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->withConsecutive([$updateDocumentStatuses[0]], [$updateDocumentStatuses[1]]);
+            ->willReturnCallback(fn ($value) => match($value)
+                {
+                    $updateDocumentStatuses[0], $updateDocumentStatuses[1] => null,
+                    default => throw new \LogicException()
+                }
+            );
 
         $this->jobRunner->run();
 
@@ -157,8 +167,13 @@ class JobRunnerTest extends TestCase
         $this->getNotifyStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->withConsecutive([$inProgressDocuments[0]], [$inProgressDocuments[1]])
-            ->willReturnOnConsecutiveCalls(self::throwException($expectedException), $updateDocumentStatuses[1]);
+            ->willReturnCallback(fn ($value) => match($value)
+                {
+                    $inProgressDocuments[0] => throw $expectedException,
+                    $inProgressDocuments[1] => $updateDocumentStatuses[1],
+                    default => throw new RuntimeException('Mock did not expect value ' . print_r($value, true))
+                }
+            );
 
         $this->updateDocumentStatusHandlerMock
             ->expects(self::once())
@@ -208,7 +223,6 @@ class JobRunnerTest extends TestCase
         self::assertTrue($this->logger->hasInfoThatContains('Updating'));
         self::assertTrue($this->logger->hasInfoThatContains($expectedException->getMessage()));
         self::assertTrue($this->logger->hasInfoThatContains('Finished'));
-
     }
 
     /**
@@ -252,24 +266,27 @@ class JobRunnerTest extends TestCase
         $this->getNotifyStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->withConsecutive([$inProgressDocuments[0]], [$inProgressDocuments[1]])
-            ->willReturnOnConsecutiveCalls($updateDocumentStatuses[0], $updateDocumentStatuses[1]);
+            ->willReturnCallback(fn ($value) => match ($value) {
+                $inProgressDocuments[0] => $updateDocumentStatuses[0],
+                $inProgressDocuments[1] => $updateDocumentStatuses[1],
+                default => throw new RuntimeException('Mock did not expect value ' . print_r($value, true))
+            });
 
         // Throw an exception on the first execution but expect flow to continue
         $this->updateDocumentStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->withConsecutive([$updateDocumentStatuses[0]], [$updateDocumentStatuses[1]])
-            // PHPUnit is deprecating self::at, but we need to throw an exception on the first call.
-            // Current workaround, see: https://github.com/sebastianbergmann/phpunit/issues/4297
-            ->willReturnOnConsecutiveCalls(self::throwException($expectedException), null)
-        ;
+            ->willReturnCallback(fn ($value) => match ($value) {
+                $updateDocumentStatuses[0] => throw $expectedException,
+                $updateDocumentStatuses[1] => null,
+                default => throw new RuntimeException('Mock did not expect value ' . print_r($value, true))
+            });
 
         $this->jobRunner->run();
 
         self::assertTrue(
             $this->logger->hasCriticalThatContains($expectedException->getMessage()),
-            var_export($this->logger->records, true)
+            'Expected exception "' . $expectedException->getMessage() . '" was not logged: ' . var_export($this->logger->records, true)
         );
         self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
     }

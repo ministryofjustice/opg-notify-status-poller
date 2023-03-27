@@ -39,7 +39,7 @@ class GetNotifyStatusTest extends TestCase
     /**
      * @return array<mixed>
      */
-    public function constructorDataProvider(): array
+    public static function constructorDataProvider(): array
     {
         return [
             'missing documentId' => [

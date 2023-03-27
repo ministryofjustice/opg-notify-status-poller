@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace NotifyStatusPollerTest\Unit\Command\Model;
 
-use PHPUnit\Framework\TestCase;
-use NotifyStatusPoller\Exception\AggregateValidationException;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
+use NotifyStatusPoller\Exception\AggregateValidationException;
+use PHPUnit\Framework\TestCase;
 
 class UpdateDocumentStatusTest extends TestCase
 {
@@ -64,7 +64,7 @@ class UpdateDocumentStatusTest extends TestCase
     /**
      * @return array<string,array<array<string,string>,string>>
      */
-    public function commandDataProvider(): array
+    public static function commandDataProvider(): array
     {
         return [
             'missing notifyId' => [
