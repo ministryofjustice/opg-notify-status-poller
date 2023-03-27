@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use NotifyStatusPoller\Authentication\JwtAuthenticator;
-use Psr\Log\LoggerInterface;
 use Alphagov\Notifications\Client;
 use GuzzleHttp\Client as GuzzleClient;
+use NotifyStatusPoller\Authentication\JwtAuthenticator;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
+use NotifyStatusPoller\Mapper\NotifyStatus;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
 use NotifyStatusPoller\Runner\JobRunner;
-use NotifyStatusPoller\Mapper\NotifyStatus;
+use Psr\Log\LoggerInterface;
 
 // Make IDEs not show errors...
 /** @var array<mixed> $config */
@@ -54,3 +54,9 @@ $jobRunner = new JobRunner(
     $updateDocumentStatusHandler,
     $psrLoggerAdapter
 );
+
+if ($GLOBALS['exportGlobalsInSuperGlobal']) {
+    $GLOBALS['config'] = $config;
+    $GLOBALS['notifyStatusMapper'] = $notifyStatusMapper;
+    $GLOBALS['updateDocumentStatusHandler'] = $updateDocumentStatusHandler;
+}
