@@ -11,7 +11,7 @@
     cp local.env.example local.env
     
     # Install dependencies on your host machine
-    phpqa composer install --prefer-dist --no-interaction --no-scripts
+    docker-compose run cmoposer
     
     # Update the local.env file with any secret credentials when testing external services
     docker-compose build job-runner
@@ -42,6 +42,13 @@ Functional tests
     docker-compose --project-name notify-status-poller run --rm lint
     docker-compose --project-name notify-status-poller run --rm phpstan
    
+## Updating composer.json dependencies
+
+    docker-compose run composer require <PACKAGE>>:<VERSION>
+
+    E.g.
+    ocker-compose run composer require package/name:^1.0
+
 ## References
 
 - https://docs.notifications.service.gov.uk/php.html#send-a-precompiled-letter
