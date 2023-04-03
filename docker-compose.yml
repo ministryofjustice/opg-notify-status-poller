@@ -1,5 +1,5 @@
 ---
-version: "3.6"
+version: "3.7"
 
 services:
 
@@ -71,8 +71,10 @@ services:
   test-functional:
     image: notify-status-poller:latest
     depends_on:
-      - mock-notify
-      - mock-sirius
+      mock-notify:
+        condition: service_healthy
+      mock-sirius:
+        condition: service_healthy
     volumes:
       - .:/var/www
     command:
@@ -86,8 +88,10 @@ services:
   test-functional-ci:
     image: notify-status-poller:latest
     depends_on:
-      - mock-notify-ci
-      - mock-sirius-ci
+      mock-notify-ci:
+        condition: service_healthy
+      mock-sirius-ci:
+        condition: service_healthy
     command:
       - "/var/www/vendor/bin/phpunit"
       - "--configuration=/var/www/tests/phpunit.xml"
@@ -111,6 +115,11 @@ services:
       - "./docker/mock-notify:/app/mock-notify"
     ports:
       - "4010:4010"
+    healthcheck:
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   mock-sirius:
     image: mock-sirius:latest
@@ -129,6 +138,11 @@ services:
       - "./docker/mock-sirius:/app/mock-sirius"
     ports:
       - "4011:4011"
+    healthcheck:
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   mock-notify-ci:
     image: mock-notify:latest
@@ -143,6 +157,12 @@ services:
       - "/app/mock-notify/openapi.yml"
     ports:
       - "4010:4010"
+    healthcheck:
+      test: curl -f http://localhost:4010/health-check || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   mock-sirius-ci:
     image: mock-sirius:latest
@@ -159,6 +179,12 @@ services:
       - "/app/mock-sirius/openapi.yml"
     ports:
       - "4011:4011"
+    healthcheck:
+      test: curl -f http://localhost:4011/health-check || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   composer:
     image: composer
