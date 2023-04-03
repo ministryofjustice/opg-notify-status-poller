@@ -73,6 +73,12 @@ class JobRunnerTest extends TestCase
         $expectedProcessedJobCount = 3;
         $this->jobRunner->run();
 
+        self::assertArrayNotHasKey(
+            LogLevel::CRITICAL,
+            $this->logger->recordsByLevel,
+            print_r($this->logger->records, true)
+        );
+
         self::assertTrue($this->logger->hasInfoThatContains('Start'));
         self::assertTrue($this->logger->hasInfoThatContains('Updating'));
         self::assertTrue($this->logger->hasInfoThatContains('Finished'));
@@ -80,7 +86,5 @@ class JobRunnerTest extends TestCase
         $infoLogRecords =  $this->logger->recordsByLevel[LogLevel::INFO];
         self::assertEquals($expectedProcessedJobCount, $infoLogRecords[1]['context']['count']);
         self::assertEquals($expectedProcessedJobCount, $infoLogRecords[2]['context']['count']);
-
-        self::assertArrayNotHasKey(LogLevel::CRITICAL, $this->logger->recordsByLevel);
     }
 }
