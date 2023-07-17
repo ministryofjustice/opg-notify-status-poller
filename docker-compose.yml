@@ -3,7 +3,7 @@ version: "3.7"
 
 services:
 
-  job-runner:
+  status-poller:
     image: notify-status-poller:latest
     build:
       context: .
@@ -67,6 +67,15 @@ services:
       - "--coverage-text"
       - "--log-junit=/app/test-results/unit/results.xml"
       - "--testsuite=unit"
+
+  phpmetrics:
+    image: jakzal/phpqa:php8.2-alpine
+    volumes:
+      - .:/app
+    command:
+      - "phpmetrics"
+      - "--report-html=/app/test-results/phpmetrics"
+      - "/app/src/NotifyStatusPoller"
 
   test-functional:
     image: notify-status-poller:latest
