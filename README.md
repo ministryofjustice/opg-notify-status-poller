@@ -8,46 +8,42 @@
 
 ### Building with dev dependencies
 
-    cp local.env.example local.env
-    
     # Install dependencies on your host machine
-    docker-compose run cmoposer
-    
+    make composer
+
     # Update the local.env file with any secret credentials when testing external services
-    docker-compose build job-runner
+    make build-dev
 
 ### Running
 
-    docker-compose --project-name notify-status-poller up job-runner
-    
+    make up
+
 If you are not developing against a local or test version of Notify or Sirius you can run the mock services with:
 
-    docker-compose --project-name notify-status-poller up -d --build --force-recreate mock-notify
-    docker-compose --project-name notify-status-poller up -d --build --force-recreate mock-sirius
+    docker compose --project-name notify-status-poller up -d --build --force-recreate mock-notify
+    docker compose --project-name notify-status-poller up -d --build --force-recreate mock-sirius
 
 ## Testing
 
 Unit tests
 
-    docker-compose --project-name notify-status-poller run --rm test
+    make unit-test
 
 Functional tests
-    
-    docker-compose --project-name notify-status-poller up -d --build --force-recreate mock-notify
-    docker-compose --project-name notify-status-poller up -d --build --force-recreate mock-sirius
-    docker-compose --project-name notify-status-poller run --rm test-functional
-    
+
+    make functionl-test
+
 ## Check Linting / Static Analysis
 
-    docker-compose --project-name notify-status-poller run --rm lint
-    docker-compose --project-name notify-status-poller run --rm phpstan
-   
+    make lint
+    make phpstan
+
 ## Updating composer.json dependencies
 
-    docker-compose run composer require <PACKAGE>>:<VERSION>
+    docker compose run composer require <PACKAGE>>:<VERSION>
 
     E.g.
-    ocker-compose run composer require package/name:^1.0
+    docker compose run composer require package/name:^1.0
 
 ## References
 
