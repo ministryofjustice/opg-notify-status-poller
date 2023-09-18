@@ -16,7 +16,10 @@ jm_behat_report.html
 
 /build/
 /test-results/
+/tests/.phpunit.cache
 /vendor/
 /tmp-phpqa/
 
 local.env
+
+.trivy-cache
