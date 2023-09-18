@@ -28,10 +28,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: shivammathur/setup-php@v2
+      - run: |
+          cp local.env.example local.env
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
         with:
-          php-version: '8.2'
-          tools: composer:v1
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-v1-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-v1-${{ hashFiles('**/composer.lock') }}
+            composer-v1
 
       - name: Run Unit Tests
         run: make unit-test
@@ -60,10 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          tools: composer:v1
       - name: Run PHPStan
         run: make static-analysis
 
@@ -106,20 +111,13 @@ jobs:
         run: make build
 
       - name: Trivy Image Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: notify-status-poller:latest
-          format: 'template'
-          exit-code: '1'
-          ignore-unfixed: true
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
+        run: make scan
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'test-results/trivy.sarif'
 
       - name: Bump version
         id: bump_version
@@ -150,18 +148,14 @@ jobs:
           registries: 311462405659
 
       - name: Push Container
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          NOTIFY_POLLER_ECR_REPOSITORY: notify-status-poller
         run: |
-          docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:${{ steps.bump_version.outputs.tag }}
-          docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:latest
+          docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ steps.bump_version.outputs.tag }}
           if [ $BRANCH_NAME == "main" ]; then
+            docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:main-${{ steps.bump_version.outputs.tag }}
             # We want all of the tags pushed
-            docker tag notify-status-poller:latest $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:main-${{ steps.bump_version.outputs.tag }}
-            docker push --all-tags $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY
+            docker push  --all-tags 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller
           else
-            docker push $ECR_REGISTRY/$NOTIFY_POLLER_ECR_REPOSITORY:${{ steps.bump_version.outputs.tag }}
+            docker push 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ steps.bump_version.outputs.tag }}
           fi
 
   push-tags:
