@@ -48,7 +48,7 @@ jobs:
         run: make check-coverage
 
       - name: Upload Coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: |
@@ -79,7 +79,7 @@ jobs:
         run: make metrics
 
       - name: Upload Metrics
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: phpmetrics
           path: |
