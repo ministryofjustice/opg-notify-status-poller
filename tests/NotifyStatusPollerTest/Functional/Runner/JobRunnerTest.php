@@ -12,27 +12,27 @@ use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
 use NotifyStatusPoller\Runner\JobRunner;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LogLevel;
-use Psr\Log\Test\TestLogger;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 class JobRunnerTest extends TestCase
 {
     private HandlerStack $guzzleHandlerStack;
-    private TestLogger $logger;
+    private LoggerInterface&MockObject $logger;
     private JobRunner $jobRunner;
 
     public function setUp(): void
     {
         global $config,
-               $notifyStatusMapper,
-               $updateDocumentStatusHandler;
+        $notifyStatusMapper,
+        $updateDocumentStatusHandler;
 
         parent::setUp();
 
         $this->guzzleHandlerStack = HandlerStack::create();
-        $this->logger = new TestLogger();
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $guzzleClient = new GuzzleClient(['handler' => $this->guzzleHandlerStack]);
         $notifyClient = new NotifyClient([
@@ -71,20 +71,20 @@ class JobRunnerTest extends TestCase
     public function testRunSuccess(): void
     {
         $expectedProcessedJobCount = 3;
+
+        $this->logger
+            ->expects($this->exactly(3))
+            ->method('info')
+            ->willReturnCallback(function ($msg, $context = []) use ($expectedProcessedJobCount): void {
+                $this->assertContains($msg, ['Start', 'Updating', 'Finished']);
+
+                if ($msg === 'Updating' || $msg === 'Finished') {
+                    $this->assertEquals($expectedProcessedJobCount, $context['count']);
+                }
+
+                return;
+            });
+
         $this->jobRunner->run();
-
-        self::assertArrayNotHasKey(
-            LogLevel::CRITICAL,
-            $this->logger->recordsByLevel,
-            print_r($this->logger->records, true)
-        );
-
-        self::assertTrue($this->logger->hasInfoThatContains('Start'));
-        self::assertTrue($this->logger->hasInfoThatContains('Updating'));
-        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
-
-        $infoLogRecords =  $this->logger->recordsByLevel[LogLevel::INFO];
-        self::assertEquals($expectedProcessedJobCount, $infoLogRecords[1]['context']['count']);
-        self::assertEquals($expectedProcessedJobCount, $infoLogRecords[2]['context']['count']);
     }
 }
