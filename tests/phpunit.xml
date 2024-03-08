@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="bootstrap.php" backupGlobals="false" beStrictAboutTestsThatDoNotTestAnything="true" colors="true" processIsolation="false" stopOnFailure="false" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="bootstrap.php" backupGlobals="false" beStrictAboutTestsThatDoNotTestAnything="true" colors="true" processIsolation="false" stopOnFailure="false" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
   <testsuites>
     <testsuite name="unit">
       <directory>./NotifyStatusPollerTest/Unit/</directory>
@@ -10,6 +10,12 @@
   </testsuites>
   <logging/>
   <coverage>
+    <report>
+      <clover outputFile="../test-results/clover/results.xml"/>
+      <html outputDirectory="../test-results/coverage" lowUpperBound="35" highLowerBound="70"/>
+    </report>
+  </coverage>
+  <source>
     <include>
       <directory suffix=".php">../src/NotifyStatusPoller/</directory>
     </include>
@@ -17,9 +23,5 @@
       <directory suffix=".php">../public</directory>
       <directory suffix=".php">../src/bootstrap</directory>
     </exclude>
-    <report>
-      <clover outputFile="../test-results/clover/results.xml"/>
-      <html outputDirectory="../test-results/coverage" lowUpperBound="35" highLowerBound="70"/>
-    </report>
-  </coverage>
+  </source>
 </phpunit>
