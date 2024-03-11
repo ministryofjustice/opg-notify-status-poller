@@ -12,16 +12,16 @@ use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
 use NotifyStatusPoller\Runner\JobRunner;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LogLevel;
-use Psr\Log\Test\TestLogger;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
 
 class JobRunnerTest extends TestCase
 {
     private JobRunner $jobRunner;
-    private TestLogger $logger;
+    private LoggerInterface&MockObject $logger;
     private GetNotifyStatusHandler $getNotifyStatusHandlerMock;
     private GetInProgressDocumentsHandler $getInProgressDocumentsHandlerMock;
     private UpdateDocumentStatusHandler $updateDocumentStatusHandlerMock;
@@ -31,7 +31,7 @@ class JobRunnerTest extends TestCase
         $this->getInProgressDocumentsHandlerMock = $this->createMock(GetInProgressDocumentsHandler::class);
         $this->getNotifyStatusHandlerMock = $this->createMock(GetNotifyStatusHandler::class);
         $this->updateDocumentStatusHandlerMock = $this->createMock(UpdateDocumentStatusHandler::class);
-        $this->logger = new TestLogger();
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->jobRunner = new JobRunner(
             $this->getInProgressDocumentsHandlerMock,
             $this->getNotifyStatusHandlerMock,
@@ -80,8 +80,8 @@ class JobRunnerTest extends TestCase
         $this->getNotifyStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->willReturnCallback(fn ($value) => match($value)
-                {
+            ->willReturnCallback(
+                fn ($value) => match($value) {
                     $inProgressDocuments[0] => $updateDocumentStatuses[0],
                     $inProgressDocuments[1] => $updateDocumentStatuses[1],
                     default => throw new \LogicException()
@@ -91,18 +91,19 @@ class JobRunnerTest extends TestCase
         $this->updateDocumentStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->willReturnCallback(fn ($value) => match($value)
-                {
+            ->willReturnCallback(
+                fn ($value) => match($value) {
                     $updateDocumentStatuses[0], $updateDocumentStatuses[1] => null,
                     default => throw new \LogicException()
                 }
             );
 
-        $this->jobRunner->run();
+        $this->logger
+            ->expects($this->exactly(3))
+            ->method('info')
+            ->with($this->callback(fn ($msg) => in_array($msg, ['Start', 'Updating', 'Finished'])));
 
-        self::assertFalse($this->logger->hasCriticalRecords(), var_export($this->logger->records, true));
-        self::assertTrue($this->logger->hasInfoThatContains('Start'));
-        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
+        $this->jobRunner->run();
     }
 
     /**
@@ -119,11 +120,17 @@ class JobRunnerTest extends TestCase
         $this->getNotifyStatusHandlerMock->expects(self::never())->method('handle');
         $this->updateDocumentStatusHandlerMock->expects(self::never())->method('handle');
 
-        $this->jobRunner->run();
+        $this->logger
+            ->expects($this->once())
+            ->method('info')
+            ->with($this->callback(fn ($msg) => in_array($msg, ['Start'])));
 
-        self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
-        self::assertTrue($this->logger->hasInfoThatContains('Start'));
-        self::assertFalse($this->logger->hasInfoThatContains('Finished'));
+        $this->logger
+            ->expects($this->once())
+            ->method('critical')
+            ->with($this->stringContains($expectedException->getMessage()));
+
+        $this->jobRunner->run();
     }
 
     /**
@@ -167,8 +174,8 @@ class JobRunnerTest extends TestCase
         $this->getNotifyStatusHandlerMock
             ->expects(self::exactly(2))
             ->method('handle')
-            ->willReturnCallback(fn ($value) => match($value)
-                {
+            ->willReturnCallback(
+                fn ($value) => match($value) {
                     $inProgressDocuments[0] => throw $expectedException,
                     $inProgressDocuments[1] => $updateDocumentStatuses[1],
                     default => throw new RuntimeException('Mock did not expect value ' . print_r($value, true))
@@ -180,16 +187,17 @@ class JobRunnerTest extends TestCase
             ->method('handle')
             ->with($updateDocumentStatuses[1]);
 
+        $this->logger
+            ->expects($this->exactly(3))
+            ->method('info')
+            ->with($this->callback(fn ($msg) => in_array($msg, ['Start', 'Updating', 'Finished'])));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('critical')
+            ->with($this->stringContains($expectedException->getMessage()));
+
         $this->jobRunner->run();
-
-        self::assertTrue(
-            $this->logger->hasCriticalThatContains($expectedException->getMessage()),
-            var_export($this->logger->records, true)
-        );
-
-        self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
-        self::assertTrue($this->logger->hasInfoThatContains('Start'));
-        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
     }
 
     /**
@@ -217,12 +225,12 @@ class JobRunnerTest extends TestCase
 
         $this->updateDocumentStatusHandlerMock->expects(self::never())->method('handle');
 
-        $this->jobRunner->run();
+        $this->logger
+            ->expects($this->exactly(4))
+            ->method('info')
+            ->with($this->callback(fn ($msg) => in_array($msg, ['Start', 'Updating', $expectedException->getMessage(), 'Finished'])));
 
-        self::assertTrue($this->logger->hasInfoThatContains('Start'));
-        self::assertTrue($this->logger->hasInfoThatContains('Updating'));
-        self::assertTrue($this->logger->hasInfoThatContains($expectedException->getMessage()));
-        self::assertTrue($this->logger->hasInfoThatContains('Finished'));
+        $this->jobRunner->run();
     }
 
     /**
@@ -282,12 +290,16 @@ class JobRunnerTest extends TestCase
                 default => throw new RuntimeException('Mock did not expect value ' . print_r($value, true))
             });
 
-        $this->jobRunner->run();
+        $this->logger
+            ->expects($this->exactly(3))
+            ->method('info')
+            ->with($this->callback(fn ($msg) => in_array($msg, ['Start', 'Updating', 'Finished'])));
 
-        self::assertTrue(
-            $this->logger->hasCriticalThatContains($expectedException->getMessage()),
-            'Expected exception "' . $expectedException->getMessage() . '" was not logged: ' . var_export($this->logger->records, true)
-        );
-        self::assertCount(1, $this->logger->recordsByLevel[LogLevel::CRITICAL]);
+        $this->logger
+            ->expects($this->once())
+            ->method('critical')
+            ->with($this->stringContains($expectedException->getMessage()));
+
+        $this->jobRunner->run();
     }
 }
