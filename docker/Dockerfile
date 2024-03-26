@@ -5,7 +5,7 @@ ARG ENABLE_DEV_DEPS=false
 COPY composer.json composer.json
 COPY composer.lock composer.lock
 RUN if [ "$ENABLE_DEV_DEPS" = "true" ] ; then composer install --prefer-dist --no-interaction --no-scripts; else \
-    composer install --prefer-dist --no-interaction --no-scripts --no-dev; fi
+  composer install --prefer-dist --no-interaction --no-scripts --no-dev; fi
 
 RUN composer dumpautoload -o
 
@@ -15,7 +15,7 @@ RUN apk --no-cache add \
   icu-dev
 
 # Alpine Image Vulnerabilities
-RUN apk upgrade --no-cache curl libcurl nghttp2-libs libcrypto3 libssl3 libxml2
+RUN apk upgrade --no-cache c-ares curl libcurl nghttp2-libs libcrypto3 libssl3 libxml2
 
 RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install calendar
