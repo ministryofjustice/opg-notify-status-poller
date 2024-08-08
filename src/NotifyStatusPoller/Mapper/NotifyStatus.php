@@ -48,7 +48,7 @@ class NotifyStatus
     {
         // NOTE the notifications documentation is unclear on the exact on the statuses for precompiled letters -
         // there's only 3 statuses which can't be right, and the ones listed
-        // here https://docs.notifications.service.gov.uk/rest-api.html#status-precompiled-letter don't match up the
+        // here https://docs.notifications.service.gov.uk/rest-api.html#precompiled-letter-status-descriptions don't match up the
         // ones here https://docs.notifications.service.gov.uk/rest-api.html#get-the-status-of-one-message-response
         // Assumption is that statuses will be a combination of letter and precompiled letter statuses...
         if (!array_key_exists($notifyStatus, self::STATUSES)) {
