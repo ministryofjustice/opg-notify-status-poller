@@ -77,17 +77,11 @@ paths:
                 notifyStatus:
                   type: string
                   enum:
-                    - pending-virus-check
-                    - accepted
-                    - delivered
-                    - received
-                    - failed
-                    - permanent-failure
-                    - temporary-failure
-                    - technical-failure
-                    - virus-scan-failed
-                    - validation-failed
-                  example: received
+                    - queued
+                    - posting
+                    - rejected
+                    - posted
+                  example: posting
       responses:
         '204':
           description: The status was updated

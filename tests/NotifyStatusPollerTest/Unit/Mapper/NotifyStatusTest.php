@@ -29,19 +29,19 @@ class NotifyStatusTest extends TestCase
     public static function notifyStatusProvider(): array
     {
         return [
-            ['failed', NotifyStatus::FAILED],
-            ['virus-scan-failed', NotifyStatus::VIRUS_SCAN_FAILED],
-            ['validation-failed', NotifyStatus::VALIDATION_FAILED],
-            ['pending-virus-check', NotifyStatus::PENDING_VIRUS_CHECK],
-            ['accepted', NotifyStatus::ACCEPTED],
-            ['received', NotifyStatus::RECEIVED],
-            ['cancelled', NotifyStatus::CANCELLED],
-            ['technical-failure', NotifyStatus::TECHNICAL_FAILURE],
-            ['permanent-failure', NotifyStatus::PERMANENT_FAILURE],
-            ['temporary-failure', NotifyStatus::TEMPORARY_FAILURE],
-            ['created', NotifyStatus::CREATED],
-            ['sending', NotifyStatus::SENDING],
-            ['delivered', NotifyStatus::DELIVERED],
+            ['failed', 'rejected'],
+            ['virus-scan-failed', 'rejected'],
+            ['validation-failed', 'rejected'],
+            ['pending-virus-check', 'queued'],
+            ['accepted', 'posting'],
+            ['received', 'posted'],
+            ['cancelled', 'rejected'],
+            ['technical-failure', 'rejected'],
+            ['permanent-failure', 'rejected'],
+            ['temporary-failure', 'rejected'],
+            ['created', 'posting'],
+            ['sending', 'posting'],
+            ['delivered', 'posted'],
         ];
     }
 
