@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace NotifyStatusPollerTest\Unit\Runner;
 
 use Exception;
+use InvalidArgumentException;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 use NotifyStatusPoller\Exception\NotificationNotFoundException;
+use NotifyStatusPoller\Logging\Context;
+use NotifyStatusPoller\Mapper\NotifyStatus;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
@@ -59,16 +62,16 @@ class JobRunnerTest extends TestCase
             new UpdateDocumentStatus([
                 'documentId' => 100,
                 'notifyId' => 'ref-1',
-                'notifyStatus' => 'status-1',
+                'notifyStatus' => 'accepted',
                 'sendByMethod' => 'email',
-                'recipientEmailAddress' => 'test@test.com'
+                'recipientEmailAddress' => 'test@test.com',
             ]),
             new UpdateDocumentStatus([
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
-                'notifyStatus' => 'status-2',
+                'notifyStatus' => 'received',
                 'sendByMethod' => 'email',
-                'recipientEmailAddress' => 'test@test.com'
+                'recipientEmailAddress' => 'test@test.com',
             ]),
         ];
 
@@ -98,10 +101,43 @@ class JobRunnerTest extends TestCase
                 }
             );
 
+        $countMatcher = $this->exactly(3);
         $this->logger
-            ->expects($this->exactly(3))
+            ->expects($countMatcher)
             ->method('info')
-            ->with($this->callback(fn ($msg) => in_array($msg, ['Start', 'Updating', 'Finished'])));
+            ->with($this->callback(function ($msg) use ($countMatcher) {
+                return $msg === match ($countMatcher->numberOfInvocations()) {
+                    1 => 'Start',
+                    2 => 'Updating',
+                    3 => 'Finished',
+                    default => throw new InvalidArgumentException('Method execution count not supported'),
+                };
+            }), $this->callback(function ($context) use ($countMatcher) {
+                return $context === match ($countMatcher->numberOfInvocations()) {
+                    1 => ['context' => Context::NOTIFY_POLLER],
+                    2 => ['count' => 2, 'context' => Context::NOTIFY_POLLER],
+                    3 => [
+                        'count' => 2,
+                        'notify_status_counts' => [
+                            NotifyStatus::PENDING_VIRUS_CHECK => 0,
+                            NotifyStatus::VIRUS_SCAN_FAILED => 0,
+                            NotifyStatus::VALIDATION_FAILED => 0,
+                            NotifyStatus::FAILED => 0,
+                            NotifyStatus::ACCEPTED => 1,
+                            NotifyStatus::RECEIVED => 1,
+                            NotifyStatus::CANCELLED => 0,
+                            NotifyStatus::TECHNICAL_FAILURE => 0,
+                            NotifyStatus::PERMANENT_FAILURE => 0,
+                            NotifyStatus::TEMPORARY_FAILURE => 0,
+                            NotifyStatus::CREATED => 0,
+                            NotifyStatus::SENDING => 0,
+                            NotifyStatus::DELIVERED => 0,
+                        ],
+                        'context' => Context::NOTIFY_POLLER,
+                    ],
+                    default => throw new InvalidArgumentException('Method execution count not supported'),
+                };
+            }));
 
         $this->jobRunner->run();
     }
