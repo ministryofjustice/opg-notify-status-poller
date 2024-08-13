@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Runner;
 
-use NotifyStatusPoller\Exception\NotificationNotFoundException;
-use NotifyStatusPoller\Mapper\NotifyStatus;
-use Throwable;
-use Psr\Log\LoggerInterface;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
+use NotifyStatusPoller\Logging\Context;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
-use NotifyStatusPoller\Logging\Context;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 class JobRunner
 {
@@ -63,21 +62,7 @@ class JobRunner
         $this->logger->info('Updating', ['count' => count($inProgressResults), 'context' => Context::NOTIFY_POLLER]);
 
         $updatedCount = 0;
-        $notifyStatusCounts = [
-            NotifyStatus::PENDING_VIRUS_CHECK => 0,
-            NotifyStatus::VIRUS_SCAN_FAILED => 0,
-            NotifyStatus::VALIDATION_FAILED => 0,
-            NotifyStatus::FAILED => 0,
-            NotifyStatus::ACCEPTED => 0,
-            NotifyStatus::RECEIVED => 0,
-            NotifyStatus::CANCELLED => 0,
-            NotifyStatus::TECHNICAL_FAILURE => 0,
-            NotifyStatus::PERMANENT_FAILURE => 0,
-            NotifyStatus::TEMPORARY_FAILURE => 0,
-            NotifyStatus::CREATED => 0,
-            NotifyStatus::SENDING => 0,
-            NotifyStatus::DELIVERED => 0,
-        ];
+        $notifyStatusCounts = [];
 
         foreach ($inProgressResults as $getNotifyStatus) {
             try {
@@ -88,6 +73,8 @@ class JobRunner
 
                 if (array_key_exists($updateDocumentStatus->getNotifyStatus(), $notifyStatusCounts)) {
                     $notifyStatusCounts[$updateDocumentStatus->getNotifyStatus()]++;
+                } else {
+                    $notifyStatusCounts[$updateDocumentStatus->getNotifyStatus()] = 1;
                 }
             } catch (NotificationNotFoundException $e) {
                 $this->logger

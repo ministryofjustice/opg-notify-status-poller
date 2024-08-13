@@ -6,6 +6,7 @@ namespace NotifyStatusPollerTest\Unit\Runner;
 
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 use NotifyStatusPoller\Exception\NotificationNotFoundException;
@@ -57,6 +58,10 @@ class JobRunnerTest extends TestCase
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
             ]),
+            new GetNotifyStatus([
+                'documentId' => 300,
+                'notifyId' => 'ref-3',
+            ]),
         ];
         $updateDocumentStatuses = [
             new UpdateDocumentStatus([
@@ -73,6 +78,13 @@ class JobRunnerTest extends TestCase
                 'sendByMethod' => 'email',
                 'recipientEmailAddress' => 'test@test.com',
             ]),
+            new UpdateDocumentStatus([
+                'documentId' => 300,
+                'notifyId' => 'ref-3',
+                'notifyStatus' => 'received',
+                'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com',
+            ]),
         ];
 
         $this->getInProgressDocumentsHandlerMock
@@ -81,23 +93,24 @@ class JobRunnerTest extends TestCase
             ->willReturn($inProgressDocuments);
 
         $this->getNotifyStatusHandlerMock
-            ->expects(self::exactly(2))
+            ->expects(self::exactly(3))
             ->method('handle')
             ->willReturnCallback(
                 fn ($value) => match($value) {
                     $inProgressDocuments[0] => $updateDocumentStatuses[0],
                     $inProgressDocuments[1] => $updateDocumentStatuses[1],
-                    default => throw new \LogicException()
+                    $inProgressDocuments[2] => $updateDocumentStatuses[2],
+                    default => throw new LogicException(),
                 }
             );
 
         $this->updateDocumentStatusHandlerMock
-            ->expects(self::exactly(2))
+            ->expects(self::exactly(3))
             ->method('handle')
             ->willReturnCallback(
                 fn ($value) => match($value) {
-                    $updateDocumentStatuses[0], $updateDocumentStatuses[1] => null,
-                    default => throw new \LogicException()
+                    $updateDocumentStatuses[0], $updateDocumentStatuses[1], $updateDocumentStatuses[2] => null,
+                    default => throw new LogicException(),
                 }
             );
 
@@ -115,23 +128,12 @@ class JobRunnerTest extends TestCase
             }), $this->callback(function ($context) use ($countMatcher) {
                 return $context === match ($countMatcher->numberOfInvocations()) {
                     1 => ['context' => Context::NOTIFY_POLLER],
-                    2 => ['count' => 2, 'context' => Context::NOTIFY_POLLER],
+                    2 => ['count' => 3, 'context' => Context::NOTIFY_POLLER],
                     3 => [
-                        'count' => 2,
+                        'count' => 3,
                         'notify_status_counts' => [
-                            NotifyStatus::PENDING_VIRUS_CHECK => 0,
-                            NotifyStatus::VIRUS_SCAN_FAILED => 0,
-                            NotifyStatus::VALIDATION_FAILED => 0,
-                            NotifyStatus::FAILED => 0,
                             NotifyStatus::ACCEPTED => 1,
-                            NotifyStatus::RECEIVED => 1,
-                            NotifyStatus::CANCELLED => 0,
-                            NotifyStatus::TECHNICAL_FAILURE => 0,
-                            NotifyStatus::PERMANENT_FAILURE => 0,
-                            NotifyStatus::TEMPORARY_FAILURE => 0,
-                            NotifyStatus::CREATED => 0,
-                            NotifyStatus::SENDING => 0,
-                            NotifyStatus::DELIVERED => 0,
+                            NotifyStatus::RECEIVED => 2,
                         ],
                         'context' => Context::NOTIFY_POLLER,
                     ],
