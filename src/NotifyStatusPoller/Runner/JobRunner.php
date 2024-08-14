@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace NotifyStatusPoller\Runner;
 
-use NotifyStatusPoller\Exception\NotificationNotFoundException;
-use Throwable;
-use Psr\Log\LoggerInterface;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
+use NotifyStatusPoller\Exception\NotificationNotFoundException;
+use NotifyStatusPoller\Logging\Context;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
-use NotifyStatusPoller\Logging\Context;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 class JobRunner
 {
@@ -60,13 +60,22 @@ class JobRunner
         }
 
         $this->logger->info('Updating', ['count' => count($inProgressResults), 'context' => Context::NOTIFY_POLLER]);
+
         $updatedCount = 0;
+        $notifyStatusCounts = [];
 
         foreach ($inProgressResults as $getNotifyStatus) {
             try {
                 $updateDocumentStatus = $this->getNotifyStatusHandler->handle($getNotifyStatus);
                 $this->updateDocumentStatusHandler->handle($updateDocumentStatus);
+
                 $updatedCount++;
+
+                if (array_key_exists($updateDocumentStatus->getNotifyStatus(), $notifyStatusCounts)) {
+                    $notifyStatusCounts[$updateDocumentStatus->getNotifyStatus()]++;
+                } else {
+                    $notifyStatusCounts[$updateDocumentStatus->getNotifyStatus()] = 1;
+                }
             } catch (NotificationNotFoundException $e) {
                 $this->logger
                     ->info(
@@ -82,6 +91,6 @@ class JobRunner
             }
         }
 
-        $this->logger->info('Finished', ['count' => $updatedCount, 'context' => Context::NOTIFY_POLLER]);
+        $this->logger->info('Finished', ['count' => $updatedCount, 'notify_status_counts' => $notifyStatusCounts, 'context' => Context::NOTIFY_POLLER]);
     }
 }

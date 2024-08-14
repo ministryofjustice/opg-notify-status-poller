@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace NotifyStatusPollerTest\Unit\Runner;
 
 use Exception;
+use InvalidArgumentException;
+use LogicException;
 use NotifyStatusPoller\Command\Handler\UpdateDocumentStatusHandler;
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 use NotifyStatusPoller\Exception\NotificationNotFoundException;
+use NotifyStatusPoller\Logging\Context;
+use NotifyStatusPoller\Mapper\NotifyStatus;
 use NotifyStatusPoller\Query\Handler\GetInProgressDocumentsHandler;
 use NotifyStatusPoller\Query\Handler\GetNotifyStatusHandler;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
@@ -54,21 +58,32 @@ class JobRunnerTest extends TestCase
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
             ]),
+            new GetNotifyStatus([
+                'documentId' => 300,
+                'notifyId' => 'ref-3',
+            ]),
         ];
         $updateDocumentStatuses = [
             new UpdateDocumentStatus([
                 'documentId' => 100,
                 'notifyId' => 'ref-1',
-                'notifyStatus' => 'status-1',
+                'notifyStatus' => 'accepted',
                 'sendByMethod' => 'email',
-                'recipientEmailAddress' => 'test@test.com'
+                'recipientEmailAddress' => 'test@test.com',
             ]),
             new UpdateDocumentStatus([
                 'documentId' => 200,
                 'notifyId' => 'ref-2',
-                'notifyStatus' => 'status-2',
+                'notifyStatus' => 'received',
                 'sendByMethod' => 'email',
-                'recipientEmailAddress' => 'test@test.com'
+                'recipientEmailAddress' => 'test@test.com',
+            ]),
+            new UpdateDocumentStatus([
+                'documentId' => 300,
+                'notifyId' => 'ref-3',
+                'notifyStatus' => 'received',
+                'sendByMethod' => 'email',
+                'recipientEmailAddress' => 'test@test.com',
             ]),
         ];
 
@@ -78,30 +93,53 @@ class JobRunnerTest extends TestCase
             ->willReturn($inProgressDocuments);
 
         $this->getNotifyStatusHandlerMock
-            ->expects(self::exactly(2))
+            ->expects(self::exactly(3))
             ->method('handle')
             ->willReturnCallback(
                 fn ($value) => match($value) {
                     $inProgressDocuments[0] => $updateDocumentStatuses[0],
                     $inProgressDocuments[1] => $updateDocumentStatuses[1],
-                    default => throw new \LogicException()
+                    $inProgressDocuments[2] => $updateDocumentStatuses[2],
+                    default => throw new LogicException(),
                 }
             );
 
         $this->updateDocumentStatusHandlerMock
-            ->expects(self::exactly(2))
+            ->expects(self::exactly(3))
             ->method('handle')
             ->willReturnCallback(
                 fn ($value) => match($value) {
-                    $updateDocumentStatuses[0], $updateDocumentStatuses[1] => null,
-                    default => throw new \LogicException()
+                    $updateDocumentStatuses[0], $updateDocumentStatuses[1], $updateDocumentStatuses[2] => null,
+                    default => throw new LogicException(),
                 }
             );
 
+        $countMatcher = $this->exactly(3);
         $this->logger
-            ->expects($this->exactly(3))
+            ->expects($countMatcher)
             ->method('info')
-            ->with($this->callback(fn ($msg) => in_array($msg, ['Start', 'Updating', 'Finished'])));
+            ->with($this->callback(function ($msg) use ($countMatcher) {
+                return $msg === match ($countMatcher->numberOfInvocations()) {
+                    1 => 'Start',
+                    2 => 'Updating',
+                    3 => 'Finished',
+                    default => throw new InvalidArgumentException('Method execution count not supported'),
+                };
+            }), $this->callback(function ($context) use ($countMatcher) {
+                return $context === match ($countMatcher->numberOfInvocations()) {
+                    1 => ['context' => Context::NOTIFY_POLLER],
+                    2 => ['count' => 3, 'context' => Context::NOTIFY_POLLER],
+                    3 => [
+                        'count' => 3,
+                        'notify_status_counts' => [
+                            NotifyStatus::ACCEPTED => 1,
+                            NotifyStatus::RECEIVED => 2,
+                        ],
+                        'context' => Context::NOTIFY_POLLER,
+                    ],
+                    default => throw new InvalidArgumentException('Method execution count not supported'),
+                };
+            }));
 
         $this->jobRunner->run();
     }
