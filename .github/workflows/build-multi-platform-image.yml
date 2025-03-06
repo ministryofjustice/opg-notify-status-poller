@@ -1,0 +1,76 @@
+name: Build Multi Platform
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_single_images:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - actions_runner: ubuntu-latest
+            tag: AMD64
+          - actions_runner: ubuntu-24.04-arm
+            tag: ARM64
+
+    name: "Build ${{ matrix.tag }} Image"
+    runs-on: ${{ matrix.actions_runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Image
+        env:
+          TAG: ${{ matrix.tag }}
+        run: make build
+
+      - name: Save image
+        run: |
+          mkdir -p /tmp/images
+          docker save -o /tmp/images/${{ matrix.tag }}.tar 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ matrix.tag }}
+      - name: Archive image
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ matrix.tag }}
+          path: /tmp/images/${{ matrix.tag }}.tar
+
+  build_multi_arch_image:
+    name: "Build Multi Architecture Image"
+    runs-on: ubuntu-latest
+    needs: [build_single_images]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker
+        run: |
+          echo '{"experimental": true, "features": { "containerd-snapshotter": true }}' | sudo tee -a /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker run --privileged --rm tonistiigi/binfmt --install all
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: /tmp/images
+          pattern: image-*
+          merge-multiple: true
+      - name: Load Images
+        run: |
+          docker load -i /tmp/images/ARM64.tar
+          docker load -i /tmp/images/AMD64.tar
+
+      - name: Build Image
+        run: make build
+
+      - name: Save image
+        run: |
+          mkdir -p /tmp/images
+          docker save -o /tmp/images/notify-status-poller.tar 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest
+      - name: Archive image
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-image
+          path: |
+            /tmp/images/notify-status-poller.tar
+
