@@ -1,4 +1,4 @@
-FROM composer as composer
+FROM composer AS composer
 
 ARG ENABLE_DEV_DEPS=false
 # Allow parallel downloads
@@ -15,7 +15,7 @@ RUN apk --no-cache add \
   icu-dev
 
 # Alpine Image Vulnerabilities
-RUN apk upgrade --no-cache busybox c-ares curl libcurl nghttp2-libs libcrypto3 libssl3 libxml2
+RUN apk upgrade --no-cache busybox c-ares curl libcurl musl-utils nghttp2-libs libcrypto3 libssl3 libxml2
 
 RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install calendar
