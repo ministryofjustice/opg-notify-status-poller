@@ -6,6 +6,7 @@ namespace NotifyStatusPollerTest\Unit\Command\Model;
 
 use NotifyStatusPoller\Command\Model\UpdateDocumentStatus;
 use NotifyStatusPoller\Exception\AggregateValidationException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class UpdateDocumentStatusTest extends TestCase
@@ -51,8 +52,8 @@ class UpdateDocumentStatusTest extends TestCase
     /**
      * @param array<string,string> $data
      * @param string               $expectedMessage
-     * @dataProvider commandDataProvider
      */
+    #[DataProvider('commandDataProvider')]
     public function testFromArrayThrowsExceptionFailure(array $data, string $expectedMessage): void
     {
         self::expectException(AggregateValidationException::class);

@@ -6,6 +6,7 @@ namespace NotifyStatusPollerTest\Unit\Query\Model;
 
 use NotifyStatusPoller\Exception\AggregateValidationException;
 use NotifyStatusPoller\Query\Model\GetNotifyStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class GetNotifyStatusTest extends TestCase
@@ -24,8 +25,8 @@ class GetNotifyStatusTest extends TestCase
     /**
      * @param array $data
      * @param string|null $expectedExceptionMessage
-     * @dataProvider constructorDataProvider
      */
+    #[DataProvider('constructorDataProvider')]
     public function test_constructor_throws_exception_for_invalid_data(
         array $data,
         string $expectedExceptionMessage
