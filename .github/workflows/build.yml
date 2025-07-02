@@ -85,6 +85,10 @@ jobs:
           path: |
             ./test-results/phpmetrics
 
+  create-tag:
+    name: Create Tags
+    uses: ./.github/workflows/create-tags.yml
+
   build:
     name: Build Image
     uses: ministryofjustice/opg-github-workflows/.github/workflows/build-multi-architecture-image.yml@6bc0246b5cca2f4c85d06986c82a9a42643f6851 # v3.13.0
@@ -96,9 +100,7 @@ jobs:
   push:
     name: "Push Image"
     runs-on: ubuntu-latest
-    needs: ['lint', 'test-unit', 'test-functional', 'static-analysis', 'build']
-    outputs:
-      tag: ${{ steps.semver_tag.outputs.created_tag }}
+    needs: ['lint', 'test-unit', 'test-functional', 'static-analysis', 'create-tag', 'build']
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -122,13 +124,6 @@ jobs:
           role-to-assume: arn:aws:iam::311462405659:role/sirius-actions-ci
           role-duration-seconds: 3600
           role-session-name: GitHubActions
-
-      - name: Bump version
-        id: semver_tag
-        uses: ministryofjustice/opg-github-actions/.github/actions/semver-tag@c9c5dfb290b8f614df0884928c521165ba83d630 # v3.1.4
-        with:
-          default_bump: minor
-          releases_enabled: false
 
       - name: Set up Docker
         run: |
@@ -166,14 +161,31 @@ jobs:
 
       - name: Tag & Push
         run: |
-          docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ steps.semver_tag.outputs.created_tag }}
+          docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ needs.create-tag.outputs.tag }}
           if [ $BRANCH_NAME == "main" ]; then
-            docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:main-${{ steps.semver_tag.outputs.created_tag }}
-            docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:main-${{ steps.semver_tag.outputs.created_tag }}-$(date +"%Y%m%d%H%M%S")
+            docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:main-${{ needs.create-tag.outputs.tag }}
+            docker tag 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:main-${{ needs.create-tag.outputs.tag }}-${{ needs.create-tag.outputs.timestamp }}
             # We want all of the tags pushed
             docker push  --all-tags 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller
           else
-            docker push 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ steps.semver_tag.outputs.created_tag }}
+            docker push 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:${{ needs.create-tag.outputs.tag }}
+          fi
+  
+  end_of_pr_workflow:
+    name: End of PR Workflow
+    runs-on: ubuntu-latest
+    if: always()
+    needs: ['lint', 'test-unit', 'test-functional', 'static-analysis', 'create-tag', 'build', 'push']
+    steps:
+      - name: End of PR Workflow
+        run: |
+          if ${{ contains(needs.*.result,'failure') }}
+          then
+            echo "Not all checks succedeed, check the previous jobs."
+            exit 1
+          else
+            echo "All checks succedeed!"
+            exit 0
           fi
 
   push-tags:
