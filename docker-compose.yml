@@ -1,7 +1,7 @@
 services:
 
   status-poller:
-    image: 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest
+    image: 311462405659.dkr.ecr.eu-west-1.amazonaws.com/sirius/notify-status-poller:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -86,7 +86,7 @@ services:
       - "100"
 
   test-functional:
-    image: 311462405659.dkr.ecr.eu-west-1.amazonaws.com/notify-status-poller:latest
+    image: 311462405659.dkr.ecr.eu-west-1.amazonaws.com/sirius/notify-status-poller:latest
     depends_on:
       mock-notify:
         condition: service_healthy
