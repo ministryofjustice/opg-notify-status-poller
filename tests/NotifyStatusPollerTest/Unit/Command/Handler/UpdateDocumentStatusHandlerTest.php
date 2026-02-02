@@ -51,7 +51,8 @@ class UpdateDocumentStatusHandlerTest extends TestCase
             'notifyStatus' => $siriusStatus,
             'notifySubStatus' => $command->getNotifyStatus(),
             'sendByMethod' => $command->getSendByMethod(),
-            'recipientEmailAddress' => $command->getRecipientEmailAddress()
+            'recipientEmailAddress' => $command->getRecipientEmailAddress(),
+            'postage' => 'economy'
         ];
 
         $this->mockNotifyStatusMapper
@@ -85,7 +86,8 @@ class UpdateDocumentStatusHandlerTest extends TestCase
             'notifyStatus' => $siriusStatus,
             'notifySubStatus' => $command->getNotifyStatus(),
             'sendByMethod' => $command->getSendByMethod(),
-            'recipientEmailAddress' => $command->getRecipientEmailAddress()
+            'recipientEmailAddress' => $command->getRecipientEmailAddress(),
+            'postage' => $command->getPostage()
         ];
 
         $this->mockNotifyStatusMapper
@@ -119,7 +121,8 @@ class UpdateDocumentStatusHandlerTest extends TestCase
             'notifyStatus' => NotifyStatus::ACCEPTED,
             'documentId' => '4545',
             'sendByMethod' => 'email',
-            'recipientEmailAddress' => 'test@test.com'
+            'recipientEmailAddress' => 'test@test.com',
+            'postage' => 'economy'
         ]);
     }
 }
