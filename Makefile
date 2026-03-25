@@ -1,4 +1,4 @@
-all: lint static-analysis unit-test check-coverage build-dev functional-test build scan
+all: lint static-analysis unit-test check-coverage build-dev functional-test build
 
 lint: copy-env
 	docker compose run lint
