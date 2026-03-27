@@ -13,6 +13,7 @@ class UpdateDocumentStatus
     protected string $notifyStatus;
     protected string $sendByMethod;
     protected ?string $recipientEmailAddress;
+    protected ?string $postage;
 
     /**
      * @param array<string,mixed> $data
@@ -44,6 +45,7 @@ class UpdateDocumentStatus
         $this->notifyStatus = $data['notifyStatus'];
         $this->sendByMethod = $data['sendByMethod'];
         $this->recipientEmailAddress = $data['recipientEmailAddress'];
+        $this->postage = $data['postage'];
     }
 
     public function getDocumentId(): int
@@ -69,5 +71,10 @@ class UpdateDocumentStatus
     public function getRecipientEmailAddress(): ?string
     {
         return $this->recipientEmailAddress;
+    }
+
+    public function getPostage(): ?string
+    {
+        return $this->postage;
     }
 }
