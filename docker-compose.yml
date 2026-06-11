@@ -15,7 +15,7 @@ services:
       dockerfile: docker/phpqa/Dockerfile
 
   phpstan:
-    image: jakzal/phpqa:php8.5-alpine
+    image: jakzal/phpqa:php8.5-alpine@sha256:4c0696d2afae747de71af853ac525219d09cfa655985e1aeb5de5b3bc86eb429
     volumes:
       - .:/app
     command:
@@ -25,7 +25,7 @@ services:
       - "/app/tests/phpstan.neon"
 
   lint:
-    image: jakzal/phpqa:php8.5-alpine
+    image: jakzal/phpqa:php8.5-alpine@sha256:4c0696d2afae747de71af853ac525219d09cfa655985e1aeb5de5b3bc86eb429
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -39,7 +39,7 @@ services:
       - /app/public
 
   phpmd:
-    image: jakzal/phpqa:php8.5-alpine
+    image: jakzal/phpqa:php8.5-alpine@sha256:4c0696d2afae747de71af853ac525219d09cfa655985e1aeb5de5b3bc86eb429
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -50,7 +50,7 @@ services:
       - codesize,unusedcode,naming
 
   test:
-    image: jakzal/phpqa:php8.5-alpine
+    image: jakzal/phpqa:php8.5-alpine@sha256:4c0696d2afae747de71af853ac525219d09cfa655985e1aeb5de5b3bc86eb429
     volumes:
       - .:/app
     command:
@@ -65,7 +65,7 @@ services:
       - "--testsuite=unit"
 
   phpmetrics:
-    image: jakzal/phpqa:php8.5-alpine
+    image: jakzal/phpqa:php8.5-alpine@sha256:4c0696d2afae747de71af853ac525219d09cfa655985e1aeb5de5b3bc86eb429
     volumes:
       - .:/app
     command:
@@ -74,7 +74,7 @@ services:
       - "/app/src/NotifyStatusPoller"
 
   check-coverage:
-    image: jakzal/phpqa:php8.5-alpine
+    image: jakzal/phpqa:php8.5-alpine@sha256:4c0696d2afae747de71af853ac525219d09cfa655985e1aeb5de5b3bc86eb429
     volumes:
       - .:/app
     command:
@@ -148,7 +148,7 @@ services:
       start_period: 30s
 
   composer:
-    image: composer
+    image: composer@sha256:65a161be39c6d30053492f46dcb4f3fe7a8beb6a1bcf92f79d5b41aa45604497
     command: ["install"]
     volumes:
       - ~/.composer:/tmp
