@@ -15,7 +15,7 @@ services:
       dockerfile: docker/phpqa/Dockerfile
 
   phpstan:
-    image: jakzal/phpqa:php8.5-alpine@sha256:683cd66af4898a890d57ff7a8470ae2431f0223c3b38721db46450a87972e612
+    image: jakzal/phpqa:php8.5-alpine@sha256:049a013a74655c138d276a48d714834f444c5a4fee15cc8b492634714eba4c65
     volumes:
       - .:/app
     command:
@@ -25,7 +25,7 @@ services:
       - "/app/tests/phpstan.neon"
 
   lint:
-    image: jakzal/phpqa:php8.5-alpine@sha256:683cd66af4898a890d57ff7a8470ae2431f0223c3b38721db46450a87972e612
+    image: jakzal/phpqa:php8.5-alpine@sha256:049a013a74655c138d276a48d714834f444c5a4fee15cc8b492634714eba4c65
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -39,7 +39,7 @@ services:
       - /app/public
 
   phpmd:
-    image: jakzal/phpqa:php8.5-alpine@sha256:683cd66af4898a890d57ff7a8470ae2431f0223c3b38721db46450a87972e612
+    image: jakzal/phpqa:php8.5-alpine@sha256:049a013a74655c138d276a48d714834f444c5a4fee15cc8b492634714eba4c65
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -50,7 +50,7 @@ services:
       - codesize,unusedcode,naming
 
   test:
-    image: jakzal/phpqa:php8.5-alpine@sha256:683cd66af4898a890d57ff7a8470ae2431f0223c3b38721db46450a87972e612
+    image: jakzal/phpqa:php8.5-alpine@sha256:049a013a74655c138d276a48d714834f444c5a4fee15cc8b492634714eba4c65
     volumes:
       - .:/app
     command:
@@ -65,7 +65,7 @@ services:
       - "--testsuite=unit"
 
   phpmetrics:
-    image: jakzal/phpqa:php8.5-alpine@sha256:683cd66af4898a890d57ff7a8470ae2431f0223c3b38721db46450a87972e612
+    image: jakzal/phpqa:php8.5-alpine@sha256:049a013a74655c138d276a48d714834f444c5a4fee15cc8b492634714eba4c65
     volumes:
       - .:/app
     command:
@@ -74,7 +74,7 @@ services:
       - "/app/src/NotifyStatusPoller"
 
   check-coverage:
-    image: jakzal/phpqa:php8.5-alpine@sha256:683cd66af4898a890d57ff7a8470ae2431f0223c3b38721db46450a87972e612
+    image: jakzal/phpqa:php8.5-alpine@sha256:049a013a74655c138d276a48d714834f444c5a4fee15cc8b492634714eba4c65
     volumes:
       - .:/app
     command:
