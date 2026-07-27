@@ -1,4 +1,4 @@
-FROM composer AS composer-prod
+FROM composer@sha256:5946476338742b200bb9ff88f8be56275ddae4b3949c72305cb0dbf10cfcb760 AS composer-prod
 
 COPY composer.json composer.json
 COPY composer.lock composer.lock
@@ -6,7 +6,7 @@ RUN composer install --prefer-dist --no-interaction --no-scripts --no-dev
 
 RUN composer dumpautoload -o
 
-FROM composer AS composer-test
+FROM composer@sha256:5946476338742b200bb9ff88f8be56275ddae4b3949c72305cb0dbf10cfcb760 AS composer-test
 
 COPY composer.json composer.json
 COPY composer.lock composer.lock
