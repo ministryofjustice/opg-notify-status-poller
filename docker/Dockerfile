@@ -1,4 +1,4 @@
-FROM composer@sha256:5946476338742b200bb9ff88f8be56275ddae4b3949c72305cb0dbf10cfcb760 AS composer-prod
+FROM composer:2.10.3@sha256:da624c2c705d54e2f5a9bb77a5dc6c7d091711433ebefd7035672e84c2010fee AS composer-prod
 
 COPY composer.json composer.json
 COPY composer.lock composer.lock
@@ -6,7 +6,7 @@ RUN composer install --prefer-dist --no-interaction --no-scripts --no-dev
 
 RUN composer dumpautoload -o
 
-FROM composer@sha256:5946476338742b200bb9ff88f8be56275ddae4b3949c72305cb0dbf10cfcb760 AS composer-test
+FROM composer:2.10.3@sha256:da624c2c705d54e2f5a9bb77a5dc6c7d091711433ebefd7035672e84c2010fee  AS composer-test
 
 COPY composer.json composer.json
 COPY composer.lock composer.lock
@@ -14,7 +14,7 @@ RUN composer install --prefer-dist --no-interaction --no-scripts
 
 RUN composer dumpautoload -o
 
-FROM php:8.5.11-cli-alpine@sha256:93684051146ec037620855feb77f278090bde45ddc030801cd3f2a7685bc4deb AS build
+FROM php:8.5.12-cli-alpine@sha256:d0cc453a4a24eb5e2e70c4657cf8bddedce4c4c33a9a348409cdc7d4b9762e94 AS build
 RUN apk --no-cache add \
   # needed by intl
   icu-dev
@@ -29,6 +29,7 @@ RUN docker-php-ext-install intl
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/memory_limit.ini /usr/local/etc/php/conf.d/memory-limit.ini
 COPY docker/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY docker/session_upload.ini /usr/local/etc/php/conf.d/session-upload.ini
 
 WORKDIR /var/www/
 COPY --chown=www-data:www-data src src
@@ -49,4 +50,3 @@ COPY --from=composer-prod --chown=www-data:www-data /app/vendor /var/www/vendor
 RUN test -d /var/www/vendor
 USER "www-data"
 CMD ["php", "-f", "/var/www/public/job_runner.php"]
-
