@@ -20,7 +20,7 @@ RUN apk --no-cache add \
   icu-dev
 
 # Alpine Image Vulnerabilities
-RUN apk upgrade --no-cache busybox c-ares curl libcurl musl-utils nghttp2-libs libcrypto3 libssl3 libsodium libxml2 sqlite-libs xz xz-libs zlib
+RUN apk upgrade --no-cache brotli-libs busybox c-ares curl libcurl musl-utils nghttp2-libs libcrypto3 libssl3 libsodium libxml2 sqlite-libs xz xz-libs zlib
 
 RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install calendar
