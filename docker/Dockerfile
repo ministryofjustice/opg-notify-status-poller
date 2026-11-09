@@ -1,4 +1,4 @@
-FROM composer:2.10.3@sha256:da624c2c705d54e2f5a9bb77a5dc6c7d091711433ebefd7035672e84c2010fee AS composer-prod
+FROM composer:2.11.0@sha256:278dfc7bd35169965d03f87194816f43bf4e6b6ea61707c2114e52ad12fe24ce AS composer-prod
 
 COPY composer.json composer.json
 COPY composer.lock composer.lock
@@ -6,7 +6,7 @@ RUN composer install --prefer-dist --no-interaction --no-scripts --no-dev
 
 RUN composer dumpautoload -o
 
-FROM composer:2.10.3@sha256:da624c2c705d54e2f5a9bb77a5dc6c7d091711433ebefd7035672e84c2010fee  AS composer-test
+FROM composer:2.11.0@sha256:278dfc7bd35169965d03f87194816f43bf4e6b6ea61707c2114e52ad12fe24ce  AS composer-test
 
 COPY composer.json composer.json
 COPY composer.lock composer.lock
