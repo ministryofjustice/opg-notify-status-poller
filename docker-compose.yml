@@ -68,8 +68,8 @@ services:
       start_period: 30s
 
   composer:
-    image: composer@sha256:7725eb4545c438629ae8bde3ef0bb9a5038ef566126ad878442a69007242d267
-    command: ["install"]
+    image: composer:2.11@sha256:919efe8e62179c71dfd31fad035fd671fe7454211c6b2aa30a10af0ab4acedba
+    command: ["install", "--ignore-platform-req=ext-mbstring"]
     volumes:
       - ~/.composer:/tmp
       - ./:/app
